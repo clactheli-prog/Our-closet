@@ -1,6 +1,6 @@
 // Our Closet — service worker for offline support.
 // Bump CACHE_VERSION when you push a new version of the app.
-var CACHE_VERSION = 'our-closet-v0.9';
+var CACHE_VERSION = 'our-closet-v1.1';
 var CACHED_FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function (e) {
