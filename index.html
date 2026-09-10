@@ -3,13 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#4F8350">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Our Closet">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<title>Our Closet v0.9</title>
+<title>Our Closet v1.1</title>
 <style>
 :root{
   --cream:#F7EFDD;
@@ -128,9 +122,12 @@ body{
 .shoprow.got .box{background:var(--person);border-color:var(--person-deep)}
 .shoprow .boxtick{font-size:13px;font-weight:700;color:#fff;line-height:1;display:none}
 .shoprow.got .boxtick{display:block}
+.shoprow .rowlabelwrap{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
 .shoprow .rowlabel{font-size:13.5px;color:var(--ink);font-weight:650;transition:color .15s}
 .shoprow .rowsub{font-size:11px;color:var(--ink-3);margin-left:6px;font-weight:400}
 .shoprow.got .rowlabel{color:var(--ink-3);text-decoration:line-through}
+.shoprow .rowprog{font-size:11.5px;font-weight:600;color:var(--secondary-deep)}
+.shoprow.got .rowprog{color:var(--person-deep);text-decoration:none}
 .shoprow.got .rowsub{text-decoration:line-through}
 .shopallset{padding:26px 18px;text-align:center;color:var(--ink-2);font-size:14px;font-weight:650}
 .shopgroup-inner{border-bottom:none}
@@ -157,6 +154,22 @@ body{
 .pagetab.addpg svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* grid-level add/remove buttons */
+/* drag-to-reorder + resize */
+.grip-handle{display:inline-flex;align-items:center;justify-content:center;width:16px;height:18px;
+  cursor:grab;color:var(--ink-3);opacity:.45;flex-shrink:0;touch-action:none;vertical-align:middle}
+.grip-handle:hover{opacity:.8;color:var(--ink-2)}
+.grip-handle svg{width:10px;height:14px;display:block}
+thead th .grip-handle{margin:-2px 2px -2px -2px}
+tbody th .grip-handle{position:absolute;left:2px;top:50%;transform:translateY(-50%)}
+tbody th.sizecol{padding-left:22px}
+.col-resize{position:absolute;right:-2px;top:0;bottom:0;width:6px;cursor:col-resize;z-index:5}
+.col-resize:hover{background:var(--person-soft)}
+.col-resize:active{background:var(--person)}
+#dropIndicator{display:none;position:fixed;z-index:100;pointer-events:none;border-radius:2px}
+.dragging-col,.dragging-row{opacity:.45}
+thead th.sizecol{position:sticky;left:0;z-index:3;
+  background:var(--panel-alt);box-shadow:3px 0 6px rgba(46,38,25,.10);border-right:1px solid var(--line)}
+
 thead th.addcolth{background:transparent;border:none;padding:0;min-width:38px;width:38px;max-width:38px}
 button.gridplus{width:34px;height:34px;border:var(--bw) dashed var(--line-2);border-radius:8px;background:transparent;cursor:pointer;
   color:var(--ink-3);font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s}
@@ -202,8 +215,8 @@ tbody tr:nth-child(even) th.sizecol{background:var(--panel-alt);box-shadow:3px 0
 tbody tr:nth-child(even) td.cell{background:#FBF6E9}
 td.cell{padding:0;text-align:center;width:var(--colw);min-width:var(--colw);max-width:var(--colw)}
 
-.cellwrap{position:relative;width:100%;min-height:54px}
-button.tog{position:relative;width:100%;min-height:54px;border:none;background:transparent;cursor:pointer;
+.cellwrap{position:relative;width:100%;min-height:60px}
+button.tog{position:relative;width:100%;min-height:60px;border:none;background:transparent;cursor:pointer;
   font:15px var(--sans);display:flex;align-items:center;justify-content:center;transition:background .15s}
 button.tog:hover{background:var(--person-soft)}
 button.tog:focus-visible{outline:2px solid var(--person);outline-offset:-3px}
@@ -213,11 +226,22 @@ button.tog .mk{font-size:18px;font-weight:700;color:var(--person-deep);line-heig
 .noteflag{position:absolute;top:3px;right:5px;font-size:14px;font-weight:700;color:var(--accent);line-height:1;
   pointer-events:none;display:none}
 .cellwrap.has-note .noteflag{display:block}
-button.pencil{position:absolute;top:2px;left:2px;width:22px;height:22px;padding:0;border:none;background:transparent;
-  cursor:pointer;color:var(--ink-3);display:flex;align-items:center;justify-content:center;opacity:.5;z-index:2}
-button.pencil:hover{opacity:1;color:var(--person-deep);background:var(--person-soft)}
+.cellwrap.under button.tog{background:var(--secondary-soft)}
+.cellwrap.under button.tog:hover{filter:brightness(.97)}
+.cellwrap.under .mk{color:var(--secondary-deep)}
+.cellwrap.at button.tog{background:var(--person-soft)}
+.cellwrap.at button.tog:hover{filter:brightness(.97)}
+.cellwrap.at .mk{color:var(--person-deep)}
+.cellwrap.over button.tog{background:var(--person-soft)}
+.cellwrap.over button.tog:hover{filter:brightness(.97)}
+.cellwrap.over .mk{color:var(--person-deep)}
+.cellwrap .surplus{font-size:10px;font-weight:700;color:var(--person);margin-left:1px}
+button.pencil{position:absolute;bottom:3px;right:3px;height:22px;padding:0 7px;border:1px solid var(--line);
+  border-radius:999px;background:var(--panel);cursor:pointer;color:var(--ink-3);display:flex;align-items:center;
+  justify-content:center;gap:3px;opacity:.65;z-index:2;font:10px var(--sans);font-weight:600;letter-spacing:.02em}
+button.pencil:hover{opacity:1;color:var(--person-deep);background:var(--person-soft);border-color:var(--person)}
 button.pencil:focus-visible{outline:2px solid var(--person);outline-offset:-2px;opacity:1}
-button.pencil svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+button.pencil svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .emptymsg{padding:24px 18px;color:var(--ink-3);font-size:13px}
 
 
@@ -333,7 +357,7 @@ window.onerror = function (msg, src, line) {
       <div class="sub">Saved on this device</div>
     </div>
     <div class="chips">
-      <div class="rev">v0.9</div>
+      <div class="rev">v1.1</div>
       <div class="who"><i></i><span id="whoLabel">Person 1</span></div>
     </div>
   </div>
@@ -387,6 +411,7 @@ window.onerror = function (msg, src, line) {
   </div>
 </div>
 
+<div id="dropIndicator"></div>
 <div class="toast" id="toast"></div>
 <input type="file" id="importFile" accept="application/json,.json" style="display:none">
 
@@ -395,10 +420,23 @@ window.onerror = function (msg, src, line) {
 (function () {
   "use strict";
 
-  var VERSION = "0.9";
+  var VERSION = "1.1";
   var STORAGE_KEY = "apparel-inventory-v1";
 
   var CHANGELOG = [
+    { v: "1.1", d: "2026-09-09", notes: [
+      "Drag to reorder \u2014 grab the grip on any column header or row header and drag to rearrange.",
+      "Drag the right edge of a column header to resize it. Widths are saved.",
+      "Works on both touch (phone) and mouse (desktop)."
+    ]},
+    { v: "1.0", d: "2026-09-09", notes: [
+      "Target quantities \u2014 tap the edit button on any cell to set how many you want, not just how many you have.",
+      "Three clear color states: coral = need more, green = covered, green with + = surplus.",
+      "Cells show \u201Chave / want\u201D when a target is set (e.g. \u201C1/3\u201D).",
+      "Shopping list now shows \u201Cneed 2 more\u201D when a target is set, instead of just \u201Cdon\u2019t have.\u201D",
+      "Bigger, more visible edit button on each cell.",
+      "No target set? Everything works exactly like before."
+    ]},
     { v: "0.9", d: "2026-08-13", notes: [
       "Added a \u201CFamily list\u201D view \u2014 one combined shopping list for every person in the household.",
       "Grouped by person, then by page and category \u2014 all collapsible.",
@@ -450,7 +488,8 @@ window.onerror = function (msg, src, line) {
     trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>',
     plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
     pencil:'<svg viewBox="0 0 24 24"><path d="M4 20h4L18.5 9.5a1.5 1.5 0 0 0 0-2.12l-1.88-1.88a1.5 1.5 0 0 0-2.12 0L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>',
-    chev:'<svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>'
+    chev:'<svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
+    grip:'<svg class="grip" viewBox="0 0 10 16"><circle cx="3" cy="3" r="1.3" fill="currentColor"/><circle cx="7" cy="3" r="1.3" fill="currentColor"/><circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="7" cy="8" r="1.3" fill="currentColor"/><circle cx="3" cy="13" r="1.3" fill="currentColor"/><circle cx="7" cy="13" r="1.3" fill="currentColor"/></svg>'
   };
 
   // ---------- person color palette ----------
@@ -499,10 +538,21 @@ window.onerror = function (msg, src, line) {
     if (!c) { c = state.owned[k] = { qty: 0, notes: [] }; }
     if (typeof c.qty !== "number") c.qty = 0;
     if (!Array.isArray(c.notes)) c.notes = [];
+    if (typeof c.target !== "number") c.target = 0;
     return c;
   }
   function qtyOf(pid, pgid, rid, cid) { var c = cellObj(pid, pgid, rid, cid); return (c && typeof c.qty === "number") ? c.qty : 0; }
   function has(pid, pgid, rid, cid) { return qtyOf(pid, pgid, rid, cid) > 0; }
+  function targetOf(pid, pgid, rid, cid) { var c = cellObj(pid, pgid, rid, cid); return (c && typeof c.target === "number" && c.target > 0) ? c.target : 0; }
+  function isCovered(pid, pgid, rid, cid) {
+    var t = targetOf(pid, pgid, rid, cid), q = qtyOf(pid, pgid, rid, cid);
+    return t > 0 ? q >= t : q > 0;
+  }
+  function needCount(pid, pgid, rid, cid) {
+    var t = targetOf(pid, pgid, rid, cid), q = qtyOf(pid, pgid, rid, cid);
+    if (t > 0) return Math.max(0, t - q);
+    return q > 0 ? 0 : 1;
+  }
   function notesOf(pid, pgid, rid, cid) { var c = cellObj(pid, pgid, rid, cid); return (c && Array.isArray(c.notes)) ? c.notes : []; }
 
   function toggleQuick(pid, pgid, rid, cid) {
@@ -519,6 +569,12 @@ window.onerror = function (msg, src, line) {
   function setNotesArr(pid, pgid, rid, cid, arr) {
     var c = ensureCell(pid, pgid, rid, cid);
     c.notes = arr.filter(function (s) { return typeof s === "string" && s.trim(); }).map(function (s) { return s.trim(); });
+    save();
+  }
+  function setTarget(pid, pgid, rid, cid, n) {
+    var c = ensureCell(pid, pgid, rid, cid);
+    n = Math.floor(n); if (isNaN(n) || n < 0) n = 0;
+    c.target = n;
     save();
   }
 
@@ -711,23 +767,11 @@ window.onerror = function (msg, src, line) {
     return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
   }
   function doExport() {
-    var filename = "our-closet_v" + VERSION + "_" + todayStr() + ".json";
-    var jsonStr = buildBackupJSON();
-    // On mobile, use the native Share sheet if available
-    if (navigator.share && navigator.canShare) {
-      var file = new File([jsonStr], filename, { type: "application/json" });
-      if (navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file], title: "Our Closet Backup" }).then(function () {
-          toast("Backup shared");
-        }).catch(function () { /* user cancelled, that's fine */ });
-        return;
-      }
-    }
-    // Fallback: download the file directly
-    var blob = new Blob([jsonStr], { type: "application/json" });
+    var blob = new Blob([buildBackupJSON()], { type: "application/json" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
-    a.href = url; a.download = filename;
+    a.href = url;
+    a.download = "our-closet_v" + VERSION + "_" + todayStr() + ".json";
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     toast("Backup file saved");
@@ -854,12 +898,27 @@ window.onerror = function (msg, src, line) {
 
     var thead = el("thead"), hr = el("tr");
     hr.appendChild(el("th", "sizecol", page.rowHeader));
-    page.categories.forEach(function (cat) {
-      var th = el("th", null, cat.label);
+    page.categories.forEach(function (cat, ci) {
+      var th = el("th");
+      th.dataset.colIdx = ci;
+      // Grip handle for drag-to-reorder
+      var g = el("span", "grip-handle");
+      g.innerHTML = ICON.grip;
+      g.addEventListener("pointerdown", function (e) { startDrag("col", ci, e); });
+      th.appendChild(g);
+      th.appendChild(document.createTextNode(cat.label));
+      // Delete button
       var db = el("button", "delcol", "\u00D7");
       db.type = "button"; db.title = "Remove " + cat.label;
       db.addEventListener("click", function (e) { e.stopPropagation(); removeCategory(cat); });
       th.appendChild(db);
+      // Resize handle on right edge
+      var rh = el("div", "col-resize");
+      rh.addEventListener("pointerdown", function (e) { startResize(ci, e); });
+      th.appendChild(rh);
+      // Apply saved width if any
+      var w = cat.width || 92;
+      th.style.width = w + "px"; th.style.minWidth = w + "px"; th.style.maxWidth = w + "px";
       hr.appendChild(th);
     });
     var addColTh = el("th", "addcolth");
@@ -871,9 +930,14 @@ window.onerror = function (msg, src, line) {
     thead.appendChild(hr); table.appendChild(thead);
 
     var tbody = el("tbody");
-    rows.forEach(function (row) {
+    rows.forEach(function (row, ri) {
       var tr = el("tr");
       var sh = el("th", "sizecol");
+      sh.dataset.rowIdx = ri;
+      var rg = el("span", "grip-handle");
+      rg.innerHTML = ICON.grip;
+      rg.addEventListener("pointerdown", function (e) { startDrag("row", ri, e); });
+      sh.appendChild(rg);
       sh.appendChild(el("span", "sz", row.label));
       if (row.sub) sh.appendChild(el("span", "age", row.sub));
       var dr = el("button", "delrow", "\u00D7");
@@ -883,6 +947,8 @@ window.onerror = function (msg, src, line) {
       tr.appendChild(sh);
       page.categories.forEach(function (cat) {
         var td = el("td", "cell");
+        var cw = cat.width || 92;
+        td.style.width = cw + "px"; td.style.minWidth = cw + "px"; td.style.maxWidth = cw + "px";
         td.appendChild(buildCell(person.id, page.id, row.id, cat.id, row.label, cat.label));
         tr.appendChild(td);
       });
@@ -912,7 +978,7 @@ window.onerror = function (msg, src, line) {
     pen.type = "button";
     pen.title = "Quantity & notes \u2014 " + rowLabel + " " + catLabel;
     pen.setAttribute("aria-label", pen.title);
-    pen.innerHTML = ICON.pencil;
+    pen.innerHTML = ICON.pencil + "edit";
     pen.addEventListener("click", function (e) { e.stopPropagation(); openCellEditor(pid, pgid, rid, cid, rowLabel, catLabel, wrap); });
     wrap.appendChild(btn);
     wrap.appendChild(pen);
@@ -924,15 +990,32 @@ window.onerror = function (msg, src, line) {
   function updateCellVisual(wrap) {
     var pid = wrap.dataset.p, pgid = wrap.dataset.pg, rid = wrap.dataset.r, cid = wrap.dataset.c;
     var q = qtyOf(pid, pgid, rid, cid), notes = notesOf(pid, pgid, rid, cid);
+    var target = targetOf(pid, pgid, rid, cid);
     var btn = wrap.querySelector("button.tog"), mk = wrap.querySelector(".mk");
     btn.classList.toggle("have", q > 0);
     btn.setAttribute("aria-pressed", q > 0 ? "true" : "false");
-    mk.textContent = q === 0 ? "" : (q === 1 ? "\u2713" : String(q));
+
+    // Clear old state classes
+    wrap.classList.remove("under", "at", "over");
+
+    if (target > 0) {
+      // Target mode: show qty/target and color state
+      mk.innerHTML = "";
+      mk.appendChild(document.createTextNode(q + "/" + target));
+      if (q < target) { wrap.classList.add("under"); }
+      else if (q === target) { wrap.classList.add("at"); }
+      else { wrap.classList.add("over"); var sp = el("span", "surplus", "+"); mk.appendChild(sp); }
+    } else {
+      // No target: original behavior
+      mk.textContent = q === 0 ? "" : (q === 1 ? "\u2713" : String(q));
+    }
+
     wrap.classList.toggle("has-note", notes.length > 0);
-    var t = [];
-    if (q > 0) t.push("Have " + q);
-    if (notes.length) t.push("Notes: " + notes.join(" | "));
-    btn.title = t.length ? t.join("  \u2014  ") : "Tap to mark have";
+    var tip = [];
+    if (q > 0) tip.push("Have " + q);
+    if (target > 0) tip.push("Want " + target);
+    if (notes.length) tip.push("Notes: " + notes.join(" | "));
+    btn.title = tip.length ? tip.join("  \u2014  ") : "Tap to mark have";
   }
 
   // ---------- shopping list (compiled across all pages) ----------
@@ -946,7 +1029,7 @@ window.onerror = function (msg, src, line) {
       var rows = pageRows(page, person.id);
       var pageNeed = 0;
       page.categories.forEach(function (cat) {
-        rows.forEach(function (row) { if (!has(person.id, page.id, row.id, cat.id)) pageNeed++; });
+        rows.forEach(function (row) { if (!isCovered(person.id, page.id, row.id, cat.id)) pageNeed++; });
       });
       if (pageNeed === 0) return;
       totalNeed += pageNeed;
@@ -972,7 +1055,7 @@ window.onerror = function (msg, src, line) {
 
       page.categories.forEach(function (cat) {
         var missing = [];
-        rows.forEach(function (row) { if (!has(person.id, page.id, row.id, cat.id)) missing.push(row); });
+        rows.forEach(function (row) { if (!isCovered(person.id, page.id, row.id, cat.id)) missing.push(row); });
         if (!missing.length) return;
 
         var catKey = page.id + "_" + cat.id;
@@ -996,12 +1079,41 @@ window.onerror = function (msg, src, line) {
           var box = el("span", "box");
           box.appendChild(el("span", "boxtick", "\u2713"));
           item.appendChild(box);
-          item.appendChild(el("span", "rowlabel", row.label));
-          if (row.sub) item.appendChild(el("span", "rowsub", row.sub));
+          var labelWrap = el("span", "rowlabelwrap");
+          labelWrap.appendChild(el("span", "rowlabel", row.label));
+          if (row.sub) labelWrap.appendChild(el("span", "rowsub", row.sub));
+          var t0 = targetOf(person.id, page.id, row.id, cat.id);
+          var q0 = qtyOf(person.id, page.id, row.id, cat.id);
+          if (t0 > 0 && q0 < t0) {
+            var prog = el("span", "rowprog", "need " + (t0 - q0) + " more");
+            labelWrap.appendChild(prog);
+          }
+          item.appendChild(labelWrap);
           item.addEventListener("click", function () {
-            var isGot = item.classList.contains("got");
-            if (isGot) { setQty(person.id, page.id, row.id, cat.id, 0); item.classList.remove("got"); }
-            else { setQty(person.id, page.id, row.id, cat.id, 1); item.classList.add("got"); }
+            var t = targetOf(person.id, page.id, row.id, cat.id);
+            var q = qtyOf(person.id, page.id, row.id, cat.id);
+            if (t > 0) {
+              // Target mode: increment by 1, undo when already covered
+              if (q >= t) { setQty(person.id, page.id, row.id, cat.id, 0); item.classList.remove("got"); }
+              else {
+                setQty(person.id, page.id, row.id, cat.id, q + 1);
+                if (q + 1 >= t) item.classList.add("got");
+              }
+              // Update the progress text
+              var newQ = qtyOf(person.id, page.id, row.id, cat.id);
+              var progEl = item.querySelector(".rowprog");
+              if (newQ >= t) {
+                if (progEl) progEl.textContent = "got all " + t;
+              } else {
+                if (!progEl) { progEl = el("span", "rowprog"); item.querySelector(".rowlabelwrap").appendChild(progEl); }
+                progEl.textContent = "need " + (t - newQ) + " more";
+              }
+            } else {
+              // No target: simple toggle
+              var isGot = item.classList.contains("got");
+              if (isGot) { setQty(person.id, page.id, row.id, cat.id, 0); item.classList.remove("got"); }
+              else { setQty(person.id, page.id, row.id, cat.id, 1); item.classList.add("got"); }
+            }
             updateShopSummary(person, summaryEl);
             var cntEl = head.querySelector(".cnt");
             if (cntEl) { var n = countCatNeed(page, cat.id, person); cntEl.textContent = n + " needed"; }
@@ -1033,7 +1145,7 @@ window.onerror = function (msg, src, line) {
 
   function countCatNeed(page, catId, person) {
     var n = 0;
-    pageRows(page, person.id).forEach(function (row) { if (!has(person.id, page.id, row.id, catId)) n++; });
+    pageRows(page, person.id).forEach(function (row) { if (!isCovered(person.id, page.id, row.id, catId)) n++; });
     return n;
   }
   function countPageNeed(page, person) {
@@ -1065,7 +1177,7 @@ window.onerror = function (msg, src, line) {
       state.pages.forEach(function (page) {
         var rows = pageRows(page, person.id);
         page.categories.forEach(function (cat) {
-          rows.forEach(function (row) { if (!has(person.id, page.id, row.id, cat.id)) personNeed++; });
+          rows.forEach(function (row) { if (!isCovered(person.id, page.id, row.id, cat.id)) personNeed++; });
         });
       });
       if (personNeed === 0) return;
@@ -1117,7 +1229,7 @@ window.onerror = function (msg, src, line) {
 
         page.categories.forEach(function (cat) {
           var missing = [];
-          rows.forEach(function (row) { if (!has(person.id, page.id, row.id, cat.id)) missing.push(row); });
+          rows.forEach(function (row) { if (!isCovered(person.id, page.id, row.id, cat.id)) missing.push(row); });
           if (!missing.length) return;
 
           var catKey = "fam_" + person.id + "_" + page.id + "_" + cat.id;
@@ -1235,7 +1347,7 @@ window.onerror = function (msg, src, line) {
   function renderCellBody() {
     var body = document.getElementById("cellBody");
     body.innerHTML = "";
-    body.appendChild(el("div", "cellsecttitle", "Quantity"));
+    body.appendChild(el("div", "cellsecttitle", "How many do you have?"));
     var qr = el("div", "qtyrow");
     qr.appendChild(el("label", null, "0 = don\u2019t have it"));
     var minus = el("button", "stepbtn", "\u2212"); minus.type = "button"; minus.title = "Less";
@@ -1264,6 +1376,36 @@ window.onerror = function (msg, src, line) {
     qty.addEventListener("blur", commitQty);
     qr.appendChild(minus); qr.appendChild(qty); qr.appendChild(plus);
     body.appendChild(qr);
+
+    body.appendChild(el("div", "cellsecttitle", "How many do you want? (optional)"));
+    var tr = el("div", "qtyrow");
+    tr.appendChild(el("label", null, "0 = no target"));
+    var tminus = el("button", "stepbtn", "\u2212"); tminus.type = "button"; tminus.title = "Less";
+    var tgt = el("input", "qty"); tgt.type = "text"; tgt.setAttribute("inputmode", "numeric");
+    tgt.value = String(targetOf(edit.pid, edit.pgid, edit.rid, edit.cid));
+    var tplus = el("button", "stepbtn", "+"); tplus.type = "button"; tplus.title = "More";
+    function commitTarget() {
+      var n = parseInt(tgt.value, 10); if (isNaN(n) || n < 0) n = 0;
+      setTarget(edit.pid, edit.pgid, edit.rid, edit.cid, n);
+      tgt.value = String(targetOf(edit.pid, edit.pgid, edit.rid, edit.cid));
+      if (edit.wrap) updateCellVisual(edit.wrap);
+    }
+    function tstep(d) {
+      var n = targetOf(edit.pid, edit.pgid, edit.rid, edit.cid) + d; if (n < 0) n = 0;
+      setTarget(edit.pid, edit.pgid, edit.rid, edit.cid, n);
+      tgt.value = String(n);
+      if (edit.wrap) updateCellVisual(edit.wrap);
+    }
+    tminus.addEventListener("click", function () { tstep(-1); });
+    tplus.addEventListener("click", function () { tstep(1); });
+    tgt.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { tgt.blur(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); tstep(1); }
+      else if (e.key === "ArrowDown") { e.preventDefault(); tstep(-1); }
+    });
+    tgt.addEventListener("blur", commitTarget);
+    tr.appendChild(tminus); tr.appendChild(tgt); tr.appendChild(tplus);
+    body.appendChild(tr);
 
     body.appendChild(el("div", "cellsecttitle", "Notes"));
     var list = el("div"); list.id = "cellNoteList";
@@ -1473,6 +1615,19 @@ window.onerror = function (msg, src, line) {
       });
       cs.appendChild(copyDiv);
     }
+    if (page.categories.some(function (c) { return c.width && c.width !== 92; })) {
+      var resetDiv = el("div"); resetDiv.style.marginTop = "8px";
+      var resetBtn = el("button", "copybtn", "\u21D4 Reset column widths");
+      resetBtn.type = "button";
+      resetBtn.addEventListener("click", function () {
+        page.categories.forEach(function (c) { delete c.width; });
+        save(); renderGrid();
+        toast("Column widths reset to default");
+        renderSettings();
+      });
+      resetDiv.appendChild(resetBtn);
+      cs.appendChild(resetDiv);
+    }
     body.appendChild(cs);
 
     // Rows for this person on this page
@@ -1634,6 +1789,159 @@ window.onerror = function (msg, src, line) {
     toast("Deleted page: " + pg.label);
   }
 
+  // ---------- drag-to-reorder + column resize ----------
+  var drag = { active: false, type: null, index: -1, startX: 0, startY: 0, moved: false, pointerId: -1 };
+  var rsz = { active: false, index: -1, startX: 0, startWidth: 0, pointerId: -1 };
+
+  function startDrag(type, index, e) {
+    if (e.button && e.button !== 0) return;
+    e.preventDefault();
+    drag.active = true; drag.type = type; drag.index = index;
+    drag.startX = e.clientX; drag.startY = e.clientY; drag.moved = false;
+    drag.pointerId = e.pointerId;
+    e.target.closest(".grip-handle").setPointerCapture(e.pointerId);
+  }
+
+  function startResize(index, e) {
+    if (e.button && e.button !== 0) return;
+    e.preventDefault(); e.stopPropagation();
+    rsz.active = true; rsz.index = index;
+    rsz.startX = e.clientX; rsz.pointerId = e.pointerId;
+    var ths = document.querySelectorAll("#grid thead th:not(.sizecol):not(.addcolth)");
+    rsz.startWidth = ths[index] ? ths[index].getBoundingClientRect().width : 92;
+    e.target.setPointerCapture(e.pointerId);
+  }
+
+  document.addEventListener("pointermove", function (e) {
+    if (drag.active) {
+      var dx = e.clientX - drag.startX, dy = e.clientY - drag.startY;
+      if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 8) return;
+      drag.moved = true;
+      if (drag.type === "col") showColDrop(e.clientX);
+      else showRowDrop(e.clientY);
+    }
+    if (rsz.active) {
+      var delta = e.clientX - rsz.startX;
+      var newW = Math.max(50, Math.min(300, rsz.startWidth + delta));
+      var page = activePage();
+      if (page.categories[rsz.index]) {
+        page.categories[rsz.index].width = Math.round(newW);
+        var ths = document.querySelectorAll("#grid thead th:not(.sizecol):not(.addcolth)");
+        if (ths[rsz.index]) {
+          ths[rsz.index].style.width = newW + "px";
+          ths[rsz.index].style.minWidth = newW + "px";
+          ths[rsz.index].style.maxWidth = newW + "px";
+        }
+        // Resize matching td cells
+        var rows = document.querySelectorAll("#grid tbody tr:not(.addrowtr)");
+        Array.prototype.forEach.call(rows, function (tr) {
+          var tds = tr.querySelectorAll("td.cell");
+          if (tds[rsz.index]) {
+            tds[rsz.index].style.width = newW + "px";
+            tds[rsz.index].style.minWidth = newW + "px";
+            tds[rsz.index].style.maxWidth = newW + "px";
+          }
+        });
+      }
+    }
+  });
+
+  document.addEventListener("pointerup", function (e) {
+    var ind = document.getElementById("dropIndicator");
+    if (drag.active && drag.moved) {
+      ind.style.display = "none";
+      // Remove dragging class
+      document.querySelectorAll(".dragging-col,.dragging-row").forEach(function (el) {
+        el.classList.remove("dragging-col", "dragging-row");
+      });
+      var page = activePage();
+      if (drag.type === "col") {
+        var dropIdx = calcColDrop(e.clientX);
+        if (dropIdx !== -1 && dropIdx !== drag.index && dropIdx !== drag.index + 1) {
+          var item = page.categories.splice(drag.index, 1)[0];
+          if (dropIdx > drag.index) dropIdx--;
+          page.categories.splice(dropIdx, 0, item);
+          save(); renderGrid();
+        }
+      } else {
+        var rows = pageRows(page, activePerson().id);
+        var dropIdx = calcRowDrop(e.clientY);
+        if (dropIdx !== -1 && dropIdx !== drag.index && dropIdx !== drag.index + 1) {
+          var item = rows.splice(drag.index, 1)[0];
+          if (dropIdx > drag.index) dropIdx--;
+          rows.splice(dropIdx, 0, item);
+          save(); renderGrid();
+        }
+      }
+    } else if (drag.active) {
+      ind.style.display = "none";
+    }
+    drag.active = false;
+
+    if (rsz.active) {
+      rsz.active = false;
+      save();
+    }
+  });
+
+  function showColDrop(cx) {
+    var ths = document.querySelectorAll("#grid thead th:not(.sizecol):not(.addcolth)");
+    var ind = document.getElementById("dropIndicator");
+    if (!ths.length) return;
+    // Highlight the dragged column
+    Array.prototype.forEach.call(ths, function (th, i) {
+      th.classList.toggle("dragging-col", i === drag.index);
+    });
+    var dropIdx = calcColDrop(cx);
+    if (dropIdx === -1 || dropIdx === drag.index || dropIdx === drag.index + 1) {
+      ind.style.display = "none"; return;
+    }
+    var rect;
+    if (dropIdx === 0) { rect = ths[0].getBoundingClientRect(); posInd(ind, rect.left - 2, rect.top, 3, rect.height); }
+    else if (dropIdx <= ths.length) { rect = ths[dropIdx - 1].getBoundingClientRect(); posInd(ind, rect.right - 1, rect.top, 3, rect.height); }
+  }
+  function calcColDrop(cx) {
+    var ths = document.querySelectorAll("#grid thead th:not(.sizecol):not(.addcolth)");
+    var idx = 0;
+    Array.prototype.forEach.call(ths, function (th, i) {
+      var r = th.getBoundingClientRect();
+      if (cx > r.left + r.width / 2) idx = i + 1;
+    });
+    return idx;
+  }
+
+  function showRowDrop(cy) {
+    var trs = document.querySelectorAll("#grid tbody tr:not(.addrowtr)");
+    var ind = document.getElementById("dropIndicator");
+    if (!trs.length) return;
+    Array.prototype.forEach.call(trs, function (tr, i) {
+      tr.classList.toggle("dragging-row", i === drag.index);
+    });
+    var dropIdx = calcRowDrop(cy);
+    if (dropIdx === -1 || dropIdx === drag.index || dropIdx === drag.index + 1) {
+      ind.style.display = "none"; return;
+    }
+    var rect;
+    if (dropIdx === 0) { rect = trs[0].getBoundingClientRect(); posInd(ind, rect.left, rect.top - 2, rect.width, 3); }
+    else if (dropIdx <= trs.length) { rect = trs[dropIdx - 1].getBoundingClientRect(); posInd(ind, rect.left, rect.bottom - 1, rect.width, 3); }
+  }
+  function calcRowDrop(cy) {
+    var trs = document.querySelectorAll("#grid tbody tr:not(.addrowtr)");
+    var idx = 0;
+    Array.prototype.forEach.call(trs, function (tr, i) {
+      var r = tr.getBoundingClientRect();
+      if (cy > r.top + r.height / 2) idx = i + 1;
+    });
+    return idx;
+  }
+
+  function posInd(ind, x, y, w, h) {
+    ind.style.left = x + "px"; ind.style.top = y + "px";
+    ind.style.width = w + "px"; ind.style.height = h + "px";
+    ind.style.background = "var(--person)";
+    ind.style.display = "block";
+  }
+
   // ---------- toast ----------
   var toastTimer = null;
   function toast(msg) {
@@ -1677,7 +1985,7 @@ window.onerror = function (msg, src, line) {
 
   window.__inv = {
     getState: function () { return state; },
-    has: has, qtyOf: qtyOf, notesOf: notesOf, setQty: setQty, setNotesArr: setNotesArr,
+    has: has, isCovered: isCovered, needCount: needCount, targetOf: targetOf, qtyOf: qtyOf, notesOf: notesOf, setQty: setQty, setTarget: setTarget, setNotesArr: setNotesArr,
     buildBackupJSON: buildBackupJSON, validateBackup: validateBackup,
     migrate: migrate, normCell: normCell, defaultState: defaultState,
     addPerson: addPerson, addPage: addPage, addCategory: addCategory, addRow: addRow,
@@ -1929,6 +2237,55 @@ window.onerror = function (msg, src, line) {
       // Clean up test page
       api.removePage(coatsPage);
 
+      // --- target quantities ---
+      // Set a target on a cell and verify states
+      api.setTarget('p1', 'footwear', 's8', 'sneakers', 3);
+      api.setQty('p1', 'footwear', 's8', 'sneakers', 1);
+      api.renderAll();
+      check('Target is stored', api.targetOf('p1', 'footwear', 's8', 'sneakers') === 3);
+      check('Under target: isCovered is false', !api.isCovered('p1', 'footwear', 's8', 'sneakers'));
+      check('Under target: needCount is 2', api.needCount('p1', 'footwear', 's8', 'sneakers') === 2);
+      var underWrap = document.querySelector('.cellwrap[data-r="s8"][data-c="sneakers"]');
+      check('Under target: cell has "under" class', underWrap.classList.contains('under'));
+      check('Under target: cell shows qty/target', underWrap.querySelector('.mk').textContent.indexOf('1/3') === 0);
+
+      // At target
+      api.setQty('p1', 'footwear', 's8', 'sneakers', 3);
+      api.renderAll();
+      check('At target: isCovered is true', api.isCovered('p1', 'footwear', 's8', 'sneakers'));
+      check('At target: needCount is 0', api.needCount('p1', 'footwear', 's8', 'sneakers') === 0);
+      var atWrap = document.querySelector('.cellwrap[data-r="s8"][data-c="sneakers"]');
+      check('At target: cell has "at" class', atWrap.classList.contains('at'));
+
+      // Over target
+      api.setQty('p1', 'footwear', 's8', 'sneakers', 5);
+      api.renderAll();
+      check('Over target: isCovered is true', api.isCovered('p1', 'footwear', 's8', 'sneakers'));
+      var overWrap = document.querySelector('.cellwrap[data-r="s8"][data-c="sneakers"]');
+      check('Over target: cell has "over" class', overWrap.classList.contains('over'));
+      check('Over target: cell shows surplus +', !!overWrap.querySelector('.surplus'));
+
+      // Clear target — restore to original state
+      api.setTarget('p1', 'footwear', 's8', 'sneakers', 0);
+      api.setQty('p1', 'footwear', 's8', 'sneakers', 1);
+      api.renderAll();
+      check('No target: isCovered uses qty > 0', api.isCovered('p1', 'footwear', 's8', 'sneakers'));
+      var noTargetWrap = document.querySelector('.cellwrap[data-r="s8"][data-c="sneakers"]');
+      check('No target: no state classes', !noTargetWrap.classList.contains('under') && !noTargetWrap.classList.contains('at') && !noTargetWrap.classList.contains('over'));
+
+      // Target with qty 0
+      api.setTarget('p1', 'footwear', 's10', 'sneakers', 2);
+      api.renderAll();
+      check('Target with qty 0: not covered', !api.isCovered('p1', 'footwear', 's10', 'sneakers'));
+      check('Target with qty 0: needCount is 2', api.needCount('p1', 'footwear', 's10', 'sneakers') === 2);
+      api.setTarget('p1', 'footwear', 's10', 'sneakers', 0);
+      api.renderAll();
+
+      // --- edit button visibility ---
+      var editBtns = document.querySelectorAll('#grid button.pencil');
+      check('Edit buttons are visible on grid', editBtns.length > 0);
+      check('Edit button has "edit" text', editBtns[0].textContent.indexOf('edit') >= 0);
+
       // --- shopping list (grocery, compiled) ---
       api.setView('shopping');
       check('Shopping view activates', document.getElementById('viewShop').classList.contains('on'));
@@ -2012,10 +2369,5 @@ window.onerror = function (msg, src, line) {
 })();
 </script>
 <!-- ===== END SELF-TEST PANEL ===== -->
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(function () {});
-}
-</script>
 </body>
 </html>
