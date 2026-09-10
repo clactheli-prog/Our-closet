@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#4F8350">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Our Closet">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Our Closet v0.9</title>
+<style>
+:root{
+  --cream:#F7EFDD;
+  --panel:#FFFFFF;
+  --panel-alt:#EEE0BE;
+  --line:#D9C495;
+  --line-2:#BE9F63;
+  --ink:#2E2619;
+  --ink-2:#54452F;
+  --ink-3:#8A7857;
+  --secondary:#DD6B78;
+  --secondary-deep:#C14D5B;
+  --secondary-soft:rgba(221,107,120,.20);
+  --accent:#F0B429;
+  --person:#4F8350;
+  --person-deep:#396138;
+  --person-soft:rgba(79,131,80,.20);
+  --bw:2.5px;
+  --stitchw:3px;
+  --hw:800;
+  --colw:92px;
+  --shadow:0 2px 4px rgba(46,38,25,.14),0 10px 22px rgba(46,38,25,.16);
+  --serif:Georgia,"Iowan Old Style","Palatino Linotype","Book Antiqua",serif;
+  --sans:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:radial-gradient(circle at 50% -10%,var(--person-soft),transparent 55%),var(--cream);
+  min-height:100vh;color:var(--ink);font:14px/1.5 var(--sans);
+  padding:14px;-webkit-font-smoothing:antialiased;transition:background .25s}
+.num{font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.cap{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3)}
+.wrap{max-width:960px;margin:0 auto;border-radius:24px;padding:16px;
+  box-shadow:0 0 0 3px var(--person-soft),0 0 46px 6px var(--person-soft);transition:box-shadow .25s}
+@media(max-width:480px){
+  body{padding:8px}
+  .wrap{padding:10px;border-radius:18px}
+  .tag{padding:10px 14px 10px 26px;border-radius:12px}
+  .tag .title{font-size:19px}
+  .sheet{border-radius:12px}
+  .modal{border-radius:14px}
+}
+
+/* header tag */
+.tag{position:relative;background:var(--panel);border:var(--bw) solid var(--line-2);
+  border-top:5px solid var(--person);border-radius:16px;box-shadow:var(--shadow);
+  padding:14px 18px 14px 30px;margin-bottom:12px;display:flex;align-items:center;
+  justify-content:space-between;gap:12px;flex-wrap:wrap;transition:border-top-color .25s}
+.tag::before{content:"";position:absolute;left:14px;top:54%;transform:translateY(-50%);
+  width:9px;height:9px;border-radius:50%;background:var(--cream);border:var(--bw) solid var(--line-2)}
+.tag .title{font:22px var(--serif);font-weight:var(--hw);letter-spacing:.01em;color:var(--ink)}
+.tag .sub{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.tag .chips{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag .rev{font-size:11px;font-weight:700;color:var(--ink-2);background:var(--panel-alt);
+  border-radius:999px;padding:5px 12px;white-space:nowrap;border:1px solid var(--line)}
+.tag .who{font-size:11px;font-weight:700;color:#fff;background:var(--person);
+  border-radius:999px;padding:5px 12px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:background .25s}
+.tag .who i{width:7px;height:7px;border-radius:50%;background:#fff;opacity:.85}
+
+/* toolbar: tabs + actions */
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;flex:1;min-width:200px}
+.utilbar{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;margin-bottom:10px}
+.tab{font:13px var(--sans);font-weight:650;padding:9px 18px;min-height:40px;cursor:pointer;
+  border:var(--bw) solid var(--line-2);color:var(--ink-2);background:var(--panel);
+  border-radius:999px;box-shadow:var(--shadow);transition:all .15s}
+.tab:hover{background:var(--panel-alt)}
+.tab.active{background:var(--person);border-color:var(--person-deep);color:#fff}
+.tab.add{color:var(--ink-2);font-weight:650;background:var(--panel);display:flex;align-items:center;gap:6px}
+.iconbtn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:40px;min-width:40px;padding:0 14px;
+  font:13px var(--sans);font-weight:650;cursor:pointer;border:var(--bw) solid var(--line-2);color:var(--ink);
+  background:var(--panel);border-radius:999px;box-shadow:var(--shadow);transition:all .15s}
+.iconbtn:hover{background:var(--panel-alt)}
+.iconbtn:active{transform:translateY(1px)}
+.iconbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+
+/* sheet panel */
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.sheet .phead{display:flex;align-items:baseline;gap:10px;padding:14px 18px 4px}
+.sheet .phead h1{font-size:17px;font-weight:var(--hw);letter-spacing:.02em;color:var(--ink);font-family:var(--serif)}
+.dim{margin:8px 18px 4px;border-top:var(--stitchw) dashed var(--line-2)}
+
+/* view switcher + hint line */
+.modebar{display:flex;align-items:center;gap:10px;padding:8px 18px 6px;flex-wrap:wrap}
+.seg{display:inline-flex;border:var(--bw) solid var(--line-2);border-radius:999px;overflow:hidden;flex-shrink:0}
+.seg button{font:12px var(--sans);font-weight:650;padding:7px 12px;min-height:34px;cursor:pointer;border:none;
+  background:var(--panel);color:var(--ink-2);white-space:nowrap}
+.seg button.on{background:var(--person);color:#fff}
+.modehint{font-size:11px;color:var(--ink-3)}
+@media(max-width:600px){.modehint{display:none}}
+.shopsummary{padding:6px 18px 0;font-size:13px;color:var(--ink-2);font-weight:650;display:none}
+.shopsummary .ct{color:var(--person-deep);font-variant-numeric:tabular-nums}
+
+/* shopping grocery list */
+.shoplist{padding:6px 0 10px}
+.shopgroup{border-bottom:1px dashed var(--line)}
+.shopgroup:last-child{border-bottom:none}
+.shophead{display:flex;align-items:center;gap:8px;padding:12px 18px;cursor:pointer;
+  background:var(--panel-alt);border-top:1px dashed var(--line);-webkit-user-select:none;user-select:none}
+.shophead:hover{filter:brightness(.98)}
+.shophead:active{filter:brightness(.95)}
+.shophead .chev{width:14px;height:14px;stroke:var(--ink-3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+  transition:transform .15s;flex-shrink:0}
+.shopgroup.collapsed .chev{transform:rotate(-90deg)}
+.shophead .cat{font-size:13.5px;font-weight:var(--hw);color:var(--ink);flex:1;font-family:var(--serif)}
+.shophead .cnt{font-size:12px;font-weight:700;color:var(--secondary-deep);background:var(--secondary-soft);
+  border-radius:999px;padding:3px 10px;white-space:nowrap}
+.shopitems{overflow:hidden}
+.shopgroup.collapsed .shopitems{display:none}
+.shoprow{display:flex;align-items:center;gap:10px;padding:10px 18px 10px 42px;border-top:1px dashed var(--line);cursor:pointer;
+  -webkit-user-select:none;user-select:none}
+.shoprow:hover{background:var(--person-soft)}
+.shoprow:active{background:var(--person-soft)}
+.shoprow .box{width:20px;height:20px;border-radius:6px;border:var(--bw) solid var(--line-2);flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;background:#fff;transition:all .15s}
+.shoprow.got .box{background:var(--person);border-color:var(--person-deep)}
+.shoprow .boxtick{font-size:13px;font-weight:700;color:#fff;line-height:1;display:none}
+.shoprow.got .boxtick{display:block}
+.shoprow .rowlabel{font-size:13.5px;color:var(--ink);font-weight:650;transition:color .15s}
+.shoprow .rowsub{font-size:11px;color:var(--ink-3);margin-left:6px;font-weight:400}
+.shoprow.got .rowlabel{color:var(--ink-3);text-decoration:line-through}
+.shoprow.got .rowsub{text-decoration:line-through}
+.shopallset{padding:26px 18px;text-align:center;color:var(--ink-2);font-size:14px;font-weight:650}
+.shopgroup-inner{border-bottom:none}
+.shopgroup-inner .shophead{padding-left:32px;background:var(--panel)}
+.shopgroup-inner .shoprow{padding-left:56px}
+.shophead-page{background:var(--panel-alt);border-top:2px dashed var(--line-2)}
+.shophead-page .cat{font-size:14px}
+.shophead-person{background:var(--panel-alt);border-top:var(--stitchw) dashed var(--line-2)}
+.shophead-person .cat{font-size:15px;font-family:var(--serif)}
+.shophead-person .cnt{background:var(--secondary-soft);color:var(--secondary-deep)}
+.shopgroup-person > .shopitems .shopgroup{border-bottom:none}
+.shopgroup-person > .shopitems .shophead{padding-left:28px}
+.shopgroup-person > .shopitems .shopgroup-inner .shophead{padding-left:42px}
+.shopgroup-person > .shopitems .shoprow{padding-left:56px}
+.shopgroup-person > .shopitems .shopgroup-inner .shoprow{padding-left:68px}
+
+/* page tabs inside the sheet */
+.pagetabs{display:flex;flex-wrap:wrap;gap:0;padding:0 18px;border-bottom:var(--stitchw) dashed var(--line-2)}
+.pagetab{font:12.5px var(--sans);font-weight:650;padding:9px 16px;cursor:pointer;
+  border:none;background:transparent;color:var(--ink-3);border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:all .15s}
+.pagetab:hover{color:var(--ink)}
+.pagetab.active{color:var(--person-deep);border-bottom-color:var(--person)}
+.pagetab.addpg{display:inline-flex;align-items:center;gap:4px}
+.pagetab.addpg svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* grid-level add/remove buttons */
+thead th.addcolth{background:transparent;border:none;padding:0;min-width:38px;width:38px;max-width:38px}
+button.gridplus{width:34px;height:34px;border:var(--bw) dashed var(--line-2);border-radius:8px;background:transparent;cursor:pointer;
+  color:var(--ink-3);font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s}
+button.gridplus:hover{border-color:var(--person);color:var(--person-deep);background:var(--person-soft)}
+tbody tr.addrowtr td{border:none;padding:6px 0}
+tbody tr.addrowtr td button.gridplus{width:auto;height:32px;font-size:12px;border-radius:10px;padding:0 14px}
+thead th .delcol{position:absolute;top:3px;right:3px;width:18px;height:18px;border:none;background:transparent;
+  cursor:pointer;color:var(--ink-3);font:12px var(--sans);line-height:1;padding:0;opacity:.45;border-radius:50%;
+  display:flex;align-items:center;justify-content:center}
+thead th .delcol:hover{opacity:1;color:var(--secondary-deep);background:var(--secondary-soft)}
+thead th{position:relative}
+tbody th.sizecol .delrow{position:absolute;top:50%;right:4px;transform:translateY(-50%);width:18px;height:18px;
+  border:none;background:transparent;cursor:pointer;color:var(--ink-3);font:12px var(--sans);line-height:1;
+  padding:0;opacity:.35;border-radius:50%;display:flex;align-items:center;justify-content:center}
+tbody th.sizecol .delrow:hover{opacity:1;color:var(--secondary-deep);background:var(--secondary-soft)}
+tbody th.sizecol{position:sticky;left:0;position:relative}
+
+/* settings page tab bar */
+.setpagetabs{display:flex;flex-wrap:wrap;gap:0;margin-bottom:12px;border-bottom:var(--stitchw) dashed var(--line-2)}
+.setpagetab{font:12px var(--sans);font-weight:650;padding:7px 14px;cursor:pointer;border:none;background:transparent;
+  color:var(--ink-3);border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:all .15s}
+.setpagetab:hover{color:var(--ink)}
+.setpagetab.active{color:var(--person-deep);border-bottom-color:var(--person)}
+.copybtn{font:12.5px var(--sans);font-weight:650;padding:8px 14px;min-height:36px;cursor:pointer;color:var(--ink-2);
+  border:var(--bw) solid var(--line-2);background:var(--panel);border-radius:999px;display:inline-flex;align-items:center;gap:5px;margin-right:6px}
+.copybtn:hover{background:var(--panel-alt)}
+
+/* grid */
+.scroll{overflow-x:auto;padding:6px 8px 12px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;font-size:13.5px;min-width:100%}
+th,td{border:1px solid var(--line)}
+thead th{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);
+  padding:9px 6px;border-top:var(--stitchw) dashed var(--line-2);border-bottom:var(--stitchw) dashed var(--line-2);
+  background:var(--panel-alt);text-align:center;vertical-align:bottom;white-space:normal;line-height:1.2;
+  width:var(--colw);min-width:var(--colw);max-width:var(--colw)}
+thead th.sizecol{text-align:left;width:110px;min-width:110px;max-width:110px;position:sticky;left:0;z-index:3;
+  background:var(--panel-alt);box-shadow:3px 0 6px rgba(46,38,25,.10);border-right:1px solid var(--line)}
+tbody th.sizecol{position:sticky;left:0;background:var(--panel);text-align:left;padding:9px 14px;font-weight:650;z-index:2;
+  width:110px;min-width:110px;max-width:110px;box-shadow:3px 0 6px rgba(46,38,25,.10);border-right:1px solid var(--line)}
+tbody th.sizecol .sz{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+tbody th.sizecol .age{display:block;font-size:11px;color:var(--ink-3);font-weight:400}
+tbody tr:nth-child(even) th.sizecol{background:var(--panel-alt);box-shadow:3px 0 6px rgba(46,38,25,.10)}
+tbody tr:nth-child(even) td.cell{background:#FBF6E9}
+td.cell{padding:0;text-align:center;width:var(--colw);min-width:var(--colw);max-width:var(--colw)}
+
+.cellwrap{position:relative;width:100%;min-height:54px}
+button.tog{position:relative;width:100%;min-height:54px;border:none;background:transparent;cursor:pointer;
+  font:15px var(--sans);display:flex;align-items:center;justify-content:center;transition:background .15s}
+button.tog:hover{background:var(--person-soft)}
+button.tog:focus-visible{outline:2px solid var(--person);outline-offset:-3px}
+button.tog.have{background:var(--person-soft)}
+button.tog.have:hover{filter:brightness(.97)}
+button.tog .mk{font-size:18px;font-weight:700;color:var(--person-deep);line-height:1;font-variant-numeric:tabular-nums}
+.noteflag{position:absolute;top:3px;right:5px;font-size:14px;font-weight:700;color:var(--accent);line-height:1;
+  pointer-events:none;display:none}
+.cellwrap.has-note .noteflag{display:block}
+button.pencil{position:absolute;top:2px;left:2px;width:22px;height:22px;padding:0;border:none;background:transparent;
+  cursor:pointer;color:var(--ink-3);display:flex;align-items:center;justify-content:center;opacity:.5;z-index:2}
+button.pencil:hover{opacity:1;color:var(--person-deep);background:var(--person-soft)}
+button.pencil:focus-visible{outline:2px solid var(--person);outline-offset:-2px;opacity:1}
+button.pencil svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.emptymsg{padding:24px 18px;color:var(--ink-3);font-size:13px}
+
+
+
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(46,38,25,.35);display:none;align-items:flex-start;justify-content:center;
+  padding:24px 12px;z-index:1000;overflow:auto}
+.overlay.open{display:flex}
+.modal{background:var(--panel);border:var(--bw) solid var(--line-2);border-radius:18px;
+  box-shadow:0 10px 40px rgba(46,38,25,.30);width:100%;max-width:560px;overflow:hidden}
+.modal .mhead{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;
+  border-bottom:var(--stitchw) dashed var(--line-2);background:var(--panel-alt)}
+.modal .mhead h2{font-size:15px;font-weight:var(--hw);letter-spacing:.02em;font-family:var(--serif);color:var(--ink)}
+.xbtn{border:var(--bw) solid var(--line-2);background:var(--panel);cursor:pointer;font:16px var(--sans);line-height:1;
+  padding:5px 10px;color:var(--ink-2);border-radius:999px}
+.xbtn:hover{background:var(--panel-alt);color:var(--ink)}
+.mbody{padding:8px 18px 18px}
+.sect{margin-top:16px}
+.sect > .cap{display:block;margin-bottom:2px}
+.sectsub{font-size:11px;color:var(--ink-3);margin-bottom:8px}
+
+.editrow{display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.editrow:last-child{border-bottom:none}
+.editrow input[type=text]{flex:1;min-width:40px;border:var(--bw) solid var(--line-2);border-radius:10px;padding:8px 10px;
+  font:13px var(--sans);color:var(--ink);background:#fff}
+.editrow input[type=text]:focus{outline:none;border-color:var(--person);box-shadow:0 0 0 3px var(--person-soft)}
+.editrow input.sub{flex:.9;color:var(--ink-2)}
+.minibtn{border:var(--bw) solid var(--line-2);background:var(--panel);cursor:pointer;border-radius:10px;
+  font:13px var(--sans);min-width:34px;min-height:34px;padding:0 8px;color:var(--ink-2)}
+.minibtn:hover:not(:disabled){background:var(--panel-alt);color:var(--ink)}
+.minibtn:disabled{opacity:.35;cursor:not-allowed}
+.minibtn.del{color:var(--secondary-deep);border-color:var(--secondary)}
+.minibtn.del:hover{background:var(--secondary-soft)}
+.minibtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+.addbtn{margin-top:10px;font:13px var(--sans);font-weight:650;padding:9px 16px;min-height:38px;cursor:pointer;
+  border:var(--bw) solid var(--line-2);border-radius:999px;color:var(--person-deep);background:var(--panel);
+  display:inline-flex;align-items:center;gap:6px}
+.addbtn:hover{background:var(--person-soft)}
+.addbtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.rowhead{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.rowhead label{font-size:12px;color:var(--ink-2)}
+.rowhead input[type=text]{width:150px;border:var(--bw) solid var(--line-2);border-radius:10px;padding:7px 10px;font:13px var(--sans);background:#fff}
+.dangerbtn{font:13px var(--sans);font-weight:650;padding:9px 16px;min-height:38px;cursor:pointer;color:var(--secondary-deep);
+  border:var(--bw) solid var(--secondary);border-radius:999px;background:var(--secondary-soft)}
+.dangerbtn:hover{filter:brightness(.97)}
+.dangerbtn:disabled{opacity:.4;cursor:not-allowed}
+.changelog{font-size:12.5px;color:var(--ink-2)}
+.changelog .cv{font-weight:700;color:var(--ink);margin-top:8px}
+.changelog ul{margin:2px 0 0 16px}
+.changelog li{margin:2px 0}
+.aboutmeta{font-size:12.5px;color:var(--ink-2);margin-bottom:4px}
+.secline{font-size:11.5px;color:var(--ink-3);border-top:1px dashed var(--line);margin-top:14px;padding-top:8px}
+
+/* color swatch picker */
+.swatchrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.swatch{width:32px;height:32px;border-radius:50%;border:3px solid transparent;cursor:pointer;padding:0;position:relative;box-shadow:0 1px 2px rgba(46,38,25,.20)}
+.swatch.sel{border-color:var(--ink)}
+.swatch.sel::after{content:"\2713";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700}
+
+/* cell editor */
+.cellmodal{max-width:430px}
+.cellsecttitle{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);margin:14px 0 4px}
+.qtyrow{display:flex;align-items:center;gap:8px}
+.qtyrow label{font-size:12.5px;color:var(--ink-2);flex:1}
+.stepbtn{border:var(--bw) solid var(--line-2);background:var(--panel);border-radius:10px;cursor:pointer;
+  font:20px var(--sans);width:42px;min-height:42px;color:var(--ink);line-height:1;transition:all .15s}
+.stepbtn:hover{background:var(--person-soft);border-color:var(--person)}
+.stepbtn:active{transform:translateY(1px)}
+.qtyrow input.qty{width:66px;text-align:center;border:var(--bw) solid var(--line-2);border-radius:10px;padding:9px;font:16px var(--sans);
+  font-variant-numeric:tabular-nums;color:var(--ink);background:#fff}
+.qtyrow input.qty:focus{outline:none;border-color:var(--person);box-shadow:0 0 0 3px var(--person-soft)}
+.noterow{display:flex;align-items:center;gap:6px;margin:6px 0}
+.noterow input.noteinput{flex:1;min-width:40px;border:var(--bw) solid var(--line-2);border-radius:10px;padding:9px;font:13px var(--sans);
+  color:var(--ink);background:#fff}
+.noterow input.noteinput:focus{outline:none;border-color:var(--person);box-shadow:0 0 0 3px var(--person-soft)}
+.nonotes{font-size:12px;color:var(--ink-3);padding:4px 0}
+.cellactions{display:flex;justify-content:flex-end;margin-top:18px}
+.primarybtn{font:13.5px var(--sans);font-weight:700;padding:10px 22px;min-height:40px;cursor:pointer;color:#fff;
+  border:var(--bw) solid var(--person-deep);border-radius:999px;background:linear-gradient(180deg,var(--person),var(--person-deep));
+  box-shadow:0 1px 3px rgba(0,0,0,.20);transition:all .15s}
+.primarybtn:hover{filter:brightness(1.04)}
+.primarybtn:active{transform:translateY(1px)}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:#fff;
+  font:13px var(--sans);padding:10px 18px;border-radius:999px;box-shadow:var(--shadow);z-index:2000;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+
+<!-- Shows any script error as a red bar on the page instead of failing silently -->
+<script>
+window.onerror = function (msg, src, line) {
+  var bar = document.getElementById('errbar') || (function () {
+    var d = document.createElement('div');
+    d.id = 'errbar';
+    d.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#900;' +
+      'color:#fff;font:13px monospace;padding:8px;z-index:99999;white-space:pre-wrap';
+    document.body.appendChild(d);
+    return d;
+  })();
+  bar.textContent = 'ERROR: ' + msg + '  (line ' + line + ')';
+  return false;
+};
+</script>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="tag">
+    <div>
+      <div class="title">Our Closet</div>
+      <div class="sub">Saved on this device</div>
+    </div>
+    <div class="chips">
+      <div class="rev">v0.9</div>
+      <div class="who"><i></i><span id="whoLabel">Person 1</span></div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="tabs" id="tabs"></div>
+  </div>
+  <div class="utilbar">
+    <button class="iconbtn" id="exportBtn" title="Export a backup file">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 21h16"/></svg>Export</button>
+    <button class="iconbtn" id="importBtn" title="Import a backup file">
+      <svg viewBox="0 0 24 24"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M4 21h16"/></svg>Import</button>
+    <button class="iconbtn" id="gearBtn" title="Settings, layout &amp; about" aria-label="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9L19 19M19 5l-2.1 2.1M7.1 16.9L5 19"/></svg></button>
+  </div>
+
+  <div class="sheet">
+    <div class="phead"><h1 id="personName">Person 1</h1></div>
+    <div class="dim"></div>
+    <div class="pagetabs" id="pageTabs"></div>
+    <div class="modebar">
+      <div class="seg" role="group" aria-label="View mode">
+        <button id="viewInv" class="on">Full inventory</button>
+        <button id="viewShop">Shopping list</button>
+        <button id="viewFamily">Family list</button>
+      </div>
+      <span class="modehint" id="viewHint">Tap a cell to mark have / don't have. Tap the pencil for quantity and notes.</span>
+    </div>
+    <div class="shopsummary" id="shopSummary"></div>
+    <div class="scroll">
+      <table id="grid" aria-label="Inventory grid"></table>
+      <div id="shopList"></div>
+      <div class="emptymsg" id="emptyMsg" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- settings / layout / about modal -->
+<div class="overlay" id="settingsOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="mhead"><h2>Settings &amp; layout</h2><button class="xbtn" id="settingsClose" title="Close">✕</button></div>
+    <div class="mbody" id="settingsBody"></div>
+  </div>
+</div>
+
+<!-- per-cell editor: quantity + notes -->
+<div class="overlay" id="cellOverlay">
+  <div class="modal cellmodal" role="dialog" aria-modal="true" aria-label="Item editor">
+    <div class="mhead"><h2 id="cellTitle">Item</h2><button class="xbtn" id="cellClose" title="Close">✕</button></div>
+    <div class="mbody" id="cellBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept="application/json,.json" style="display:none">
+
+<!-- ===== APP ===== -->
+<script>
+(function () {
+  "use strict";
+
+  var VERSION = "0.9";
+  var STORAGE_KEY = "apparel-inventory-v1";
+
+  var CHANGELOG = [
+    { v: "0.9", d: "2026-08-13", notes: [
+      "Added a \u201CFamily list\u201D view \u2014 one combined shopping list for every person in the household.",
+      "Grouped by person, then by page and category \u2014 all collapsible.",
+      "Tapping an item checks it off just like the individual shopping list."
+    ]},
+    { v: "0.8", d: "2026-08-13", notes: [
+      "Renamed to \u201COur Closet\u201D with a warmer, cozier look \u2014 soft cream background, rounded cards, stitched dividers.",
+      "Each person now gets their own color, assigned automatically when they're added \u2014 it shows in their tab, a soft glow around the whole sheet, and every checkmark, so it's obvious at a glance whose sheet you're checking boxes in.",
+      "A person's color can be changed by hand any time from Settings \u2192 This person \u2192 Color.",
+      "All existing people, pages, sizes, columns, and checkmarks carried over exactly as they were \u2014 nothing was lost."
+    ]},
+    { v: "0.7", d: "2026-08-13", notes: [
+      "Add and remove columns and rows directly from the grid \u2014 \u201C+\u201D and \u201C\u00D7\u201D buttons right on the headers.",
+      "Settings now has page tabs so you can switch between pages without closing the panel.",
+      "\u201CCopy columns from\u201D and \u201CCopy rows from\u201D buttons let you pull structure from one page to another."
+    ]},
+    { v: "0.6", d: "2026-08-13", notes: [
+      "Pages \u2014 each clothing category (Footwear, Coats, Pants\u2026) is its own page with its own columns and rows.",
+      "Page tabs sit inside the sheet; add, rename, or delete pages from Settings.",
+      "Shopping list now compiles across ALL pages into one scrollable list, grouped by page then by category.",
+      "Existing data converts automatically into a single \u201CFootwear\u201D page."
+    ]},
+    { v: "0.5", d: "2026-08-12", notes: [
+      "Added a \u201CShopping list\u201D view \u2014 toggle it above the grid to see what\u2019s missing as a grocery-style list.",
+      "The list is grouped by category, each section collapsible with a tap.",
+      "Tap an item to mark it \u201Cgot it\u201D right in the store (sets quantity to 1).",
+      "When everything is covered the view shows \u201CAll set.\u201D"
+    ]},
+    { v: "0.4", d: "2026-08-11", notes: [
+      "Each cell now has a pencil \u2014 tap it to set a quantity and add as many notes as you want.",
+      "Cells show a number when you have more than one; a single one still shows a check.",
+      "Removed the \u201CTap to add note\u201D mode.",
+      "Older checkmarks and single notes convert automatically."
+    ]},
+    { v: "0.3", d: "2026-08-11", notes: [
+      "Added multiple people with tabs, plus add / rename / delete person.",
+      "Columns are now editable: add, rename, reorder, remove \u2014 applies to everyone.",
+      "Rows are now editable per person. Added per-cell notes.",
+      "Added Export and Import backup."
+    ]},
+    { v: "0.1", d: "2026-08-11", notes: [
+      "First grid: one person, tap-to-toggle, pre-filled from the sheet, saves to the device."
+    ]}
+  ];
+
+  var ICON = {
+    up:   '<svg viewBox="0 0 24 24"><path d="M12 19V6"/><path d="M6 12l6-6 6 6"/></svg>',
+    down: '<svg viewBox="0 0 24 24"><path d="M12 5v13"/><path d="M6 12l6 6 6-6"/></svg>',
+    trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>',
+    plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
+    pencil:'<svg viewBox="0 0 24 24"><path d="M4 20h4L18.5 9.5a1.5 1.5 0 0 0 0-2.12l-1.88-1.88a1.5 1.5 0 0 0-2.12 0L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>',
+    chev:'<svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>'
+  };
+
+  // ---------- person color palette ----------
+  var PALETTE = [
+    { name: "Sage",   primary: "#4F8350", deep: "#396138", soft: "rgba(79,131,80,.20)" },
+    { name: "Plum",   primary: "#8B4B8F", deep: "#6C3970", soft: "rgba(139,75,143,.20)" },
+    { name: "Teal",   primary: "#2F7A82", deep: "#215B62", soft: "rgba(47,122,130,.20)" },
+    { name: "Rust",   primary: "#B5592B", deep: "#8F441F", soft: "rgba(181,89,43,.20)" },
+    { name: "Indigo", primary: "#4C5FA0", deep: "#37437C", soft: "rgba(76,95,160,.20)" },
+    { name: "Cocoa",  primary: "#7B5233", deep: "#5E3D26", soft: "rgba(123,82,51,.20)" }
+  ];
+  function colorForIndex(i) {
+    var n = ((i % PALETTE.length) + PALETTE.length) % PALETTE.length;
+    var p = PALETTE[n];
+    return { name: p.name, primary: p.primary, deep: p.deep, soft: p.soft };
+  }
+  function ensureColors(st) {
+    if (st && Array.isArray(st.people)) {
+      st.people.forEach(function (p, i) {
+        if (!p.color || typeof p.color.primary !== "string") p.color = colorForIndex(i);
+      });
+    }
+    return st;
+  }
+
+  var state = null;
+  var viewMode = "inventory";
+  var settingsPageId = null;
+
+  // ---------- helpers ----------
+  function uid(p) { return p + Math.random().toString(36).slice(2, 8); }
+  function key(pid, pgid, rid, cid) { return pid + "|" + pgid + "|" + rid + "|" + cid; }
+  function activePerson() {
+    var id = state.activePersonId;
+    return state.people.filter(function (p) { return p.id === id; })[0] || state.people[0];
+  }
+  function activePage() {
+    var id = state.activePageId;
+    return state.pages.filter(function (pg) { return pg.id === id; })[0] || state.pages[0];
+  }
+  function pageRows(page, pid) { return (page.rows && page.rows[pid]) || []; }
+
+  function cellObj(pid, pgid, rid, cid) { return state.owned[key(pid, pgid, rid, cid)]; }
+  function ensureCell(pid, pgid, rid, cid) {
+    var k = key(pid, pgid, rid, cid), c = state.owned[k];
+    if (!c) { c = state.owned[k] = { qty: 0, notes: [] }; }
+    if (typeof c.qty !== "number") c.qty = 0;
+    if (!Array.isArray(c.notes)) c.notes = [];
+    return c;
+  }
+  function qtyOf(pid, pgid, rid, cid) { var c = cellObj(pid, pgid, rid, cid); return (c && typeof c.qty === "number") ? c.qty : 0; }
+  function has(pid, pgid, rid, cid) { return qtyOf(pid, pgid, rid, cid) > 0; }
+  function notesOf(pid, pgid, rid, cid) { var c = cellObj(pid, pgid, rid, cid); return (c && Array.isArray(c.notes)) ? c.notes : []; }
+
+  function toggleQuick(pid, pgid, rid, cid) {
+    var c = ensureCell(pid, pgid, rid, cid);
+    c.qty = c.qty > 0 ? 0 : 1;
+    save();
+  }
+  function setQty(pid, pgid, rid, cid, n) {
+    var c = ensureCell(pid, pgid, rid, cid);
+    n = Math.floor(n); if (isNaN(n) || n < 0) n = 0;
+    c.qty = n;
+    save();
+  }
+  function setNotesArr(pid, pgid, rid, cid, arr) {
+    var c = ensureCell(pid, pgid, rid, cid);
+    c.notes = arr.filter(function (s) { return typeof s === "string" && s.trim(); }).map(function (s) { return s.trim(); });
+    save();
+  }
+
+  // ---------- person color theme ----------
+  function applyPersonTheme() {
+    var p = activePerson();
+    var c = (p && p.color && typeof p.color.primary === "string") ? p.color : PALETTE[0];
+    var root = document.documentElement.style;
+    root.setProperty("--person", c.primary);
+    root.setProperty("--person-deep", c.deep);
+    root.setProperty("--person-soft", c.soft);
+    var who = document.getElementById("whoLabel");
+    if (who) who.textContent = p ? p.name : "";
+  }
+  function setPersonColor(personId, color) {
+    var p = state.people.filter(function (x) { return x.id === personId; })[0];
+    if (!p || !color) return;
+    p.color = { name: color.name, primary: color.primary, deep: color.deep, soft: color.soft };
+    save();
+    if (personId === state.activePersonId) applyPersonTheme();
+  }
+
+  // ---------- default data ----------
+  function defaultState() {
+    var categories = [
+      { id: "sneakers",  label: "Sneakers" },
+      { id: "rainboots", label: "Rain boots" },
+      { id: "snowboots", label: "Snow boots" },
+      { id: "sandals",   label: "Sandals" },
+      { id: "crocs",     label: "Crocs / water shoes" }
+    ];
+    var p1rows = [
+      { id: "s8",  label: "Size 8",  sub: "2.5\u20133 yrs" },
+      { id: "s9",  label: "Size 9",  sub: "3\u20134 yrs" },
+      { id: "s10", label: "Size 10", sub: "4\u20134.5 yrs" },
+      { id: "s11", label: "Size 11", sub: "5 yrs" },
+      { id: "s12", label: "Size 12", sub: "5\u20135.5 yrs" },
+      { id: "s13", label: "Size 13", sub: "5.5\u20136.5 yrs" },
+      { id: "s1",  label: "Size 1",  sub: "7 yrs" },
+      { id: "s2",  label: "Size 2",  sub: "7.5 yrs" },
+      { id: "s3",  label: "Size 3",  sub: "8 yrs" },
+      { id: "s4",  label: "Size 4",  sub: "8 yrs +" }
+    ];
+    var p2rows = [
+      { id: "b12", label: "Size 12", sub: "5\u20135.5 yrs" },
+      { id: "b13", label: "Size 13", sub: "5.5\u20136.5 yrs" },
+      { id: "b1",  label: "Size 1",  sub: "7 yrs" },
+      { id: "b2",  label: "Size 2",  sub: "7.5 yrs" },
+      { id: "b3",  label: "Size 3",  sub: "8 yrs" },
+      { id: "b4",  label: "Size 4",  sub: "8 yrs +" }
+    ];
+    var owned = {};
+    function set(pid, rid, cid, note) { owned[key(pid, "footwear", rid, cid)] = { qty: 1, notes: note ? [note] : [] }; }
+    set("p1", "s8", "sneakers");  set("p1", "s8", "rainboots"); set("p1", "s8", "snowboots");
+    set("p1", "s8", "sandals", "may change"); set("p1", "s8", "crocs");
+    set("p1", "s9", "sneakers", "reg"); set("p1", "s9", "snowboots"); set("p1", "s9", "sandals");
+    set("p1", "s12", "sneakers");
+    set("p2", "b12", "sneakers");
+    set("p2", "b13", "rainboots"); set("p2", "b13", "snowboots");
+    set("p2", "b13", "sandals");   set("p2", "b13", "crocs");
+
+    return {
+      version: 4,
+      pages: [{
+        id: "footwear", label: "Footwear", rowHeader: "Size",
+        categories: categories,
+        rows: { "p1": p1rows, "p2": p2rows }
+      }],
+      people: [
+        { id: "p1", name: "Person 1", color: colorForIndex(0) },
+        { id: "p2", name: "Person 2", color: colorForIndex(1) }
+      ],
+      owned: owned,
+      activePersonId: "p1",
+      activePageId: "footwear"
+    };
+  }
+
+  // ---------- load / migrate / save ----------
+  function normCell(c) {
+    if (!c || typeof c !== "object") return { qty: 0, notes: [] };
+    var out = { qty: 0, notes: [] };
+    if (typeof c.qty === "number" && c.qty > 0) out.qty = Math.floor(c.qty);
+    else if (c.have === true) out.qty = 1;
+    if (Array.isArray(c.notes)) {
+      out.notes = c.notes.filter(function (n) { return typeof n === "string" && n.trim(); }).map(function (n) { return n.trim(); });
+    } else if (typeof c.note === "string" && c.note.trim()) {
+      out.notes = [c.note.trim()];
+    }
+    return out;
+  }
+  function normalizeOwned(owned) {
+    var out = {};
+    Object.keys(owned || {}).forEach(function (k) { out[k] = normCell(owned[k]); });
+    return out;
+  }
+  function migrate(data) {
+    if (data && data.version >= 4) {
+      if (!Array.isArray(data.pages) || !data.pages.length) return ensureColors(defaultState());
+      if (!Array.isArray(data.people) || !data.people.length) return ensureColors(defaultState());
+      var okP = data.people.some(function (p) { return p.id === data.activePersonId; });
+      if (!okP) data.activePersonId = data.people[0].id;
+      var okPg = data.pages.some(function (pg) { return pg.id === data.activePageId; });
+      if (!okPg) data.activePageId = data.pages[0].id;
+      if (!data.owned || typeof data.owned !== "object") data.owned = {};
+      data.pages.forEach(function (pg) {
+        if (!pg.rows || typeof pg.rows !== "object") pg.rows = {};
+        if (!Array.isArray(pg.categories)) pg.categories = [];
+        pg.rowHeader = pg.rowHeader || "Size";
+      });
+      return ensureColors(data);
+    }
+    if (data && data.version >= 2) {
+      if (!Array.isArray(data.people) || !data.people.length) return ensureColors(defaultState());
+      data.rowHeader = data.rowHeader || "Size";
+      if (!Array.isArray(data.categories)) data.categories = [];
+      var pgRows = {};
+      data.people.forEach(function (p) { pgRows[p.id] = p.rows || []; });
+      var page = { id: "footwear", label: "Footwear", rowHeader: data.rowHeader,
+        categories: data.categories, rows: pgRows };
+      var newOwned = {};
+      var old = normalizeOwned(data.owned);
+      Object.keys(old).forEach(function (k) {
+        var parts = k.split("|");
+        if (parts.length === 3) newOwned[parts[0] + "|footwear|" + parts[1] + "|" + parts[2]] = old[k];
+        else newOwned[k] = old[k];
+      });
+      var people = data.people.map(function (p) { return { id: p.id, name: p.name }; });
+      var okP2 = people.some(function (p) { return p.id === data.activePersonId; });
+      return ensureColors({ version: 4, pages: [page], people: people, owned: newOwned,
+        activePersonId: okP2 ? data.activePersonId : people[0].id, activePageId: "footwear" });
+    }
+    var s = defaultState();
+    var oldOwn = (data && data.owned) ? data.owned : {};
+    var merged = {};
+    Object.keys(s.owned).forEach(function (k) { if (k.indexOf("p1|") !== 0) merged[k] = s.owned[k]; });
+    Object.keys(oldOwn).forEach(function (k) {
+      var parts = k.split("|");
+      if (parts.length === 3) merged[parts[0] + "|footwear|" + parts[1] + "|" + parts[2]] = oldOwn[k];
+      else merged[k] = oldOwn[k];
+    });
+    s.owned = normalizeOwned(merged);
+    return ensureColors(s);
+  }
+
+  function load() {
+    var raw = null;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { raw = null; }
+    if (!raw) { state = defaultState(); save(); return; }
+    var data;
+    try { data = JSON.parse(raw); } catch (e) { state = defaultState(); save(); return; }
+    state = migrate(data);
+    save();
+  }
+  function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+  // ---------- backup ----------
+  function buildBackupJSON() { return JSON.stringify(state, null, 2); }
+  function validateBackup(obj) {
+    if (!obj || typeof obj !== "object") return "That file isn\u2019t a valid backup.";
+    if (!Array.isArray(obj.people)) return "Backup is missing the list of people.";
+    if (!obj.owned || typeof obj.owned !== "object") return "Backup is missing the checkmark data.";
+    if (!obj.people.length) return "Backup has no people in it.";
+    for (var i = 0; i < obj.people.length; i++) {
+      var p = obj.people[i];
+      if (!p || typeof p.id !== "string" || typeof p.name !== "string")
+        return "One of the people in the backup is malformed.";
+    }
+    var pages = obj.pages || [];
+    var cats = obj.categories || [];
+    if (!pages.length && !cats.length) return "Backup is missing pages or columns.";
+    if (pages.length) {
+      for (var j = 0; j < pages.length; j++) {
+        var pg = pages[j];
+        if (!pg || typeof pg.id !== "string" || typeof pg.label !== "string")
+          return "One of the pages in the backup is malformed.";
+      }
+    }
+    if (cats.length) {
+      for (var k2 = 0; k2 < cats.length; k2++) {
+        var c = cats[k2];
+        if (!c || typeof c.id !== "string" || typeof c.label !== "string")
+          return "One of the columns in the backup is malformed.";
+      }
+    }
+    return null;
+  }
+  function todayStr() {
+    var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+  function doExport() {
+    var filename = "our-closet_v" + VERSION + "_" + todayStr() + ".json";
+    var jsonStr = buildBackupJSON();
+    // On mobile, use the native Share sheet if available
+    if (navigator.share && navigator.canShare) {
+      var file = new File([jsonStr], filename, { type: "application/json" });
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: "Our Closet Backup" }).then(function () {
+          toast("Backup shared");
+        }).catch(function () { /* user cancelled, that's fine */ });
+        return;
+      }
+    }
+    // Fallback: download the file directly
+    var blob = new Blob([jsonStr], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast("Backup file saved");
+  }
+  function importFromObject(obj) {
+    var err = validateBackup(obj);
+    if (err) { toast(err); return false; }
+    if (!window.confirm("Replace ALL current data with this backup? This can\u2019t be undone (export your current data first if unsure).")) return false;
+    state = migrate(obj);
+    save(); renderAll();
+    toast("Backup imported");
+    return true;
+  }
+
+  // ---------- rendering ----------
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  function renderTabs() {
+    applyPersonTheme();
+    var tabs = document.getElementById("tabs");
+    tabs.innerHTML = "";
+    state.people.forEach(function (p) {
+      var b = el("button", "tab" + (p.id === state.activePersonId ? " active" : ""), p.name);
+      b.type = "button";
+      b.addEventListener("click", function () {
+        state.activePersonId = p.id; save();
+        renderTabs(); renderPageTabs(); renderGrid();
+        document.getElementById("personName").textContent = p.name;
+      });
+      tabs.appendChild(b);
+    });
+    var add = el("button", "tab add");
+    add.type = "button";
+    add.innerHTML = ICON.plus + "<span>Add person</span>";
+    add.title = "Add a person";
+    add.addEventListener("click", addPerson);
+    tabs.appendChild(add);
+  }
+
+  function renderPageTabs() {
+    var container = document.getElementById("pageTabs");
+    container.innerHTML = "";
+    state.pages.forEach(function (pg) {
+      var b = el("button", "pagetab" + (pg.id === state.activePageId ? " active" : ""), pg.label);
+      b.type = "button";
+      b.addEventListener("click", function () {
+        state.activePageId = pg.id; save();
+        renderPageTabs(); renderGrid();
+      });
+      container.appendChild(b);
+    });
+    var add = el("button", "pagetab addpg");
+    add.type = "button";
+    add.innerHTML = ICON.plus + " Add page";
+    add.title = "Add a clothing category page";
+    add.addEventListener("click", addPage);
+    container.appendChild(add);
+  }
+
+  function renderGrid() {
+    var person = activePerson();
+    var page = activePage();
+    var rows = pageRows(page, person.id);
+    document.getElementById("personName").textContent = person.name;
+    var table = document.getElementById("grid");
+    var shopList = document.getElementById("shopList");
+    var empty = document.getElementById("emptyMsg");
+    var summary = document.getElementById("shopSummary");
+    table.innerHTML = "";
+    shopList.innerHTML = "";
+    summary.style.display = "none";
+
+    if (viewMode === "shopping") {
+      table.style.display = "none";
+      shopList.style.display = "";
+      empty.style.display = "none";
+      renderShoppingList(person, shopList, summary);
+      return;
+    }
+    if (viewMode === "family") {
+      table.style.display = "none";
+      shopList.style.display = "";
+      empty.style.display = "none";
+      renderFamilyList(shopList, summary);
+      return;
+    }
+    shopList.style.display = "none";
+
+    if (!page.categories.length) {
+      table.style.display = "none"; empty.style.display = "block";
+      empty.innerHTML = "";
+      empty.appendChild(document.createTextNode("No columns yet on " + page.label + "."));
+      empty.appendChild(document.createElement("br"));
+      var ac = el("button", "addbtn"); ac.type = "button"; ac.innerHTML = ICON.plus + "<span>Add column</span>";
+      ac.style.marginTop = "8px";
+      ac.addEventListener("click", addCategory);
+      empty.appendChild(ac);
+      if (state.pages.filter(function (pg) { return pg.id !== page.id && pg.categories.length > 0; }).length) {
+        empty.appendChild(document.createElement("br"));
+        var hint = el("span"); hint.style.cssText = "font-size:11.5px;color:var(--ink-3)";
+        hint.textContent = "Or open Settings to copy columns from another page.";
+        empty.appendChild(hint);
+      }
+      return;
+    }
+    if (!rows.length) {
+      table.style.display = "none"; empty.style.display = "block";
+      empty.innerHTML = "";
+      empty.appendChild(document.createTextNode("No rows yet for " + person.name + " on " + page.label + "."));
+      empty.appendChild(document.createElement("br"));
+      var ar = el("button", "addbtn"); ar.type = "button"; ar.innerHTML = ICON.plus + "<span>Add row</span>";
+      ar.style.marginTop = "8px";
+      ar.addEventListener("click", addRow);
+      empty.appendChild(ar);
+      if (state.pages.filter(function (pg) { return pg.id !== page.id && pageRows(pg, person.id).length > 0; }).length) {
+        empty.appendChild(document.createElement("br"));
+        var hint2 = el("span"); hint2.style.cssText = "font-size:11.5px;color:var(--ink-3)";
+        hint2.textContent = "Or open Settings to copy rows from another page.";
+        empty.appendChild(hint2);
+      }
+      return;
+    }
+    table.style.display = ""; empty.style.display = "none";
+
+    var thead = el("thead"), hr = el("tr");
+    hr.appendChild(el("th", "sizecol", page.rowHeader));
+    page.categories.forEach(function (cat) {
+      var th = el("th", null, cat.label);
+      var db = el("button", "delcol", "\u00D7");
+      db.type = "button"; db.title = "Remove " + cat.label;
+      db.addEventListener("click", function (e) { e.stopPropagation(); removeCategory(cat); });
+      th.appendChild(db);
+      hr.appendChild(th);
+    });
+    var addColTh = el("th", "addcolth");
+    var addColBtn = el("button", "gridplus", "+");
+    addColBtn.type = "button"; addColBtn.title = "Add column";
+    addColBtn.addEventListener("click", addCategory);
+    addColTh.appendChild(addColBtn);
+    hr.appendChild(addColTh);
+    thead.appendChild(hr); table.appendChild(thead);
+
+    var tbody = el("tbody");
+    rows.forEach(function (row) {
+      var tr = el("tr");
+      var sh = el("th", "sizecol");
+      sh.appendChild(el("span", "sz", row.label));
+      if (row.sub) sh.appendChild(el("span", "age", row.sub));
+      var dr = el("button", "delrow", "\u00D7");
+      dr.type = "button"; dr.title = "Remove " + row.label;
+      dr.addEventListener("click", function (e) { e.stopPropagation(); removeRow(person, row); });
+      sh.appendChild(dr);
+      tr.appendChild(sh);
+      page.categories.forEach(function (cat) {
+        var td = el("td", "cell");
+        td.appendChild(buildCell(person.id, page.id, row.id, cat.id, row.label, cat.label));
+        tr.appendChild(td);
+      });
+      tr.appendChild(el("td", "cell")); // spacer under add-col header
+      tbody.appendChild(tr);
+    });
+    var addRowTr = el("tr", "addrowtr");
+    var addRowTd = el("td");
+    addRowTd.setAttribute("colspan", String(page.categories.length + 2));
+    var addRowBtn = el("button", "gridplus", "+ Add row");
+    addRowBtn.type = "button"; addRowBtn.style.fontSize = "12px";
+    addRowBtn.addEventListener("click", addRow);
+    addRowTd.appendChild(addRowBtn);
+    addRowTr.appendChild(addRowTd);
+    tbody.appendChild(addRowTr);
+    table.appendChild(tbody);
+  }
+
+  function buildCell(pid, pgid, rid, cid, rowLabel, catLabel) {
+    var wrap = el("div", "cellwrap");
+    wrap.dataset.p = pid; wrap.dataset.pg = pgid; wrap.dataset.r = rid; wrap.dataset.c = cid;
+    var btn = el("button", "tog");
+    btn.type = "button";
+    btn.appendChild(el("span", "mk", ""));
+    btn.addEventListener("click", function () { toggleQuick(pid, pgid, rid, cid); updateCellVisual(wrap); });
+    var pen = el("button", "pencil");
+    pen.type = "button";
+    pen.title = "Quantity & notes \u2014 " + rowLabel + " " + catLabel;
+    pen.setAttribute("aria-label", pen.title);
+    pen.innerHTML = ICON.pencil;
+    pen.addEventListener("click", function (e) { e.stopPropagation(); openCellEditor(pid, pgid, rid, cid, rowLabel, catLabel, wrap); });
+    wrap.appendChild(btn);
+    wrap.appendChild(pen);
+    wrap.appendChild(el("span", "noteflag", "\u2022"));
+    updateCellVisual(wrap);
+    return wrap;
+  }
+
+  function updateCellVisual(wrap) {
+    var pid = wrap.dataset.p, pgid = wrap.dataset.pg, rid = wrap.dataset.r, cid = wrap.dataset.c;
+    var q = qtyOf(pid, pgid, rid, cid), notes = notesOf(pid, pgid, rid, cid);
+    var btn = wrap.querySelector("button.tog"), mk = wrap.querySelector(".mk");
+    btn.classList.toggle("have", q > 0);
+    btn.setAttribute("aria-pressed", q > 0 ? "true" : "false");
+    mk.textContent = q === 0 ? "" : (q === 1 ? "\u2713" : String(q));
+    wrap.classList.toggle("has-note", notes.length > 0);
+    var t = [];
+    if (q > 0) t.push("Have " + q);
+    if (notes.length) t.push("Notes: " + notes.join(" | "));
+    btn.title = t.length ? t.join("  \u2014  ") : "Tap to mark have";
+  }
+
+  // ---------- shopping list (compiled across all pages) ----------
+  var shopCollapsed = {};
+
+  function renderShoppingList(person, container, summaryEl) {
+    var totalNeed = 0;
+    var multiPage = state.pages.length > 1;
+
+    state.pages.forEach(function (page) {
+      var rows = pageRows(page, person.id);
+      var pageNeed = 0;
+      page.categories.forEach(function (cat) {
+        rows.forEach(function (row) { if (!has(person.id, page.id, row.id, cat.id)) pageNeed++; });
+      });
+      if (pageNeed === 0) return;
+      totalNeed += pageNeed;
+
+      var outerKey = "page_" + page.id;
+      var outerGroup, outerItems;
+
+      if (multiPage) {
+        outerGroup = el("div", "shopgroup" + (shopCollapsed[outerKey] ? " collapsed" : ""));
+        var outerHead = el("div", "shophead shophead-page");
+        outerHead.innerHTML = ICON.chev;
+        outerHead.appendChild(el("span", "cat", page.label));
+        outerHead.appendChild(el("span", "cnt", pageNeed + " needed"));
+        outerHead.addEventListener("click", function () {
+          shopCollapsed[outerKey] = !shopCollapsed[outerKey];
+          outerGroup.classList.toggle("collapsed", shopCollapsed[outerKey]);
+        });
+        outerGroup.appendChild(outerHead);
+        outerItems = el("div", "shopitems");
+      } else {
+        outerItems = container;
+      }
+
+      page.categories.forEach(function (cat) {
+        var missing = [];
+        rows.forEach(function (row) { if (!has(person.id, page.id, row.id, cat.id)) missing.push(row); });
+        if (!missing.length) return;
+
+        var catKey = page.id + "_" + cat.id;
+        var group = el("div", "shopgroup" + (multiPage ? " shopgroup-inner" : "") + (shopCollapsed[catKey] ? " collapsed" : ""));
+        var head = el("div", "shophead" + (multiPage ? " shophead-cat" : ""));
+        head.innerHTML = ICON.chev;
+        head.appendChild(el("span", "cat", cat.label));
+        head.appendChild(el("span", "cnt", missing.length + " needed"));
+        head.addEventListener("click", function (e) {
+          e.stopPropagation();
+          shopCollapsed[catKey] = !shopCollapsed[catKey];
+          group.classList.toggle("collapsed", shopCollapsed[catKey]);
+        });
+        group.appendChild(head);
+
+        var items = el("div", "shopitems");
+        missing.forEach(function (row) {
+          var item = el("div", "shoprow");
+          item.dataset.p = person.id; item.dataset.pg = page.id;
+          item.dataset.r = row.id; item.dataset.c = cat.id;
+          var box = el("span", "box");
+          box.appendChild(el("span", "boxtick", "\u2713"));
+          item.appendChild(box);
+          item.appendChild(el("span", "rowlabel", row.label));
+          if (row.sub) item.appendChild(el("span", "rowsub", row.sub));
+          item.addEventListener("click", function () {
+            var isGot = item.classList.contains("got");
+            if (isGot) { setQty(person.id, page.id, row.id, cat.id, 0); item.classList.remove("got"); }
+            else { setQty(person.id, page.id, row.id, cat.id, 1); item.classList.add("got"); }
+            updateShopSummary(person, summaryEl);
+            var cntEl = head.querySelector(".cnt");
+            if (cntEl) { var n = countCatNeed(page, cat.id, person); cntEl.textContent = n + " needed"; }
+            if (multiPage) {
+              var pgCnt = outerGroup.querySelector(".shophead-page .cnt");
+              if (pgCnt) { var pn = countPageNeed(page, person); pgCnt.textContent = pn + " needed"; }
+            }
+          });
+          items.appendChild(item);
+        });
+        group.appendChild(items);
+        outerItems.appendChild(group);
+      });
+
+      if (multiPage) {
+        outerGroup.appendChild(outerItems);
+        container.appendChild(outerGroup);
+      }
+    });
+
+    summaryEl.style.display = "block";
+    if (totalNeed === 0) {
+      summaryEl.innerHTML = "All set \u2014 " + person.name + " has every item covered.";
+      container.appendChild(el("div", "shopallset", "\u2713  Nothing to buy \u2014 every item is covered."));
+    } else {
+      updateShopSummary(person, summaryEl);
+    }
+  }
+
+  function countCatNeed(page, catId, person) {
+    var n = 0;
+    pageRows(page, person.id).forEach(function (row) { if (!has(person.id, page.id, row.id, catId)) n++; });
+    return n;
+  }
+  function countPageNeed(page, person) {
+    var n = 0;
+    page.categories.forEach(function (cat) { n += countCatNeed(page, cat.id, person); });
+    return n;
+  }
+  function updateShopSummary(person, summaryEl) {
+    var need = 0, pgCount = 0;
+    state.pages.forEach(function (page) {
+      var pn = countPageNeed(page, person);
+      if (pn > 0) { need += pn; pgCount++; }
+    });
+    if (need === 0) {
+      summaryEl.innerHTML = "All set \u2014 " + person.name + " has every item covered.";
+    } else {
+      summaryEl.innerHTML = "<span class=\"ct\">" + need + "</span> item" + (need !== 1 ? "s" : "") +
+        " still needed across <span class=\"ct\">" + pgCount + "</span> page" + (pgCount !== 1 ? "s" : "") + ".";
+    }
+  }
+
+  // ---------- family shopping list ----------
+  function renderFamilyList(container, summaryEl) {
+    var grandTotal = 0;
+    var peopleWithNeeds = 0;
+
+    state.people.forEach(function (person) {
+      var personNeed = 0;
+      state.pages.forEach(function (page) {
+        var rows = pageRows(page, person.id);
+        page.categories.forEach(function (cat) {
+          rows.forEach(function (row) { if (!has(person.id, page.id, row.id, cat.id)) personNeed++; });
+        });
+      });
+      if (personNeed === 0) return;
+      grandTotal += personNeed;
+      peopleWithNeeds++;
+
+      var personKey = "fam_" + person.id;
+      var personGroup = el("div", "shopgroup shopgroup-person" + (shopCollapsed[personKey] ? " collapsed" : ""));
+      var personHead = el("div", "shophead shophead-person");
+      personHead.innerHTML = ICON.chev;
+      personHead.appendChild(el("span", "cat", person.name));
+      personHead.appendChild(el("span", "cnt", personNeed + " needed"));
+      personHead.addEventListener("click", function () {
+        shopCollapsed[personKey] = !shopCollapsed[personKey];
+        personGroup.classList.toggle("collapsed", shopCollapsed[personKey]);
+      });
+      personGroup.appendChild(personHead);
+
+      var personItems = el("div", "shopitems");
+      var multiPage = state.pages.length > 1;
+
+      state.pages.forEach(function (page) {
+        var rows = pageRows(page, person.id);
+        var pageNeed = 0;
+        page.categories.forEach(function (cat) {
+          rows.forEach(function (row) { if (!has(person.id, page.id, row.id, cat.id)) pageNeed++; });
+        });
+        if (pageNeed === 0) return;
+
+        var pageKey = "fam_" + person.id + "_pg_" + page.id;
+        var pageGroup, pageItems;
+
+        if (multiPage) {
+          pageGroup = el("div", "shopgroup" + (shopCollapsed[pageKey] ? " collapsed" : ""));
+          var pageHead = el("div", "shophead shophead-page");
+          pageHead.innerHTML = ICON.chev;
+          pageHead.appendChild(el("span", "cat", page.label));
+          pageHead.appendChild(el("span", "cnt", pageNeed + " needed"));
+          pageHead.addEventListener("click", function (e) {
+            e.stopPropagation();
+            shopCollapsed[pageKey] = !shopCollapsed[pageKey];
+            pageGroup.classList.toggle("collapsed", shopCollapsed[pageKey]);
+          });
+          pageGroup.appendChild(pageHead);
+          pageItems = el("div", "shopitems");
+        } else {
+          pageItems = personItems;
+        }
+
+        page.categories.forEach(function (cat) {
+          var missing = [];
+          rows.forEach(function (row) { if (!has(person.id, page.id, row.id, cat.id)) missing.push(row); });
+          if (!missing.length) return;
+
+          var catKey = "fam_" + person.id + "_" + page.id + "_" + cat.id;
+          var catGroup = el("div", "shopgroup shopgroup-inner" + (shopCollapsed[catKey] ? " collapsed" : ""));
+          var catHead = el("div", "shophead");
+          catHead.innerHTML = ICON.chev;
+          catHead.appendChild(el("span", "cat", cat.label));
+          catHead.appendChild(el("span", "cnt", missing.length + " needed"));
+          catHead.addEventListener("click", function (e) {
+            e.stopPropagation();
+            shopCollapsed[catKey] = !shopCollapsed[catKey];
+            catGroup.classList.toggle("collapsed", shopCollapsed[catKey]);
+          });
+          catGroup.appendChild(catHead);
+
+          var catItems = el("div", "shopitems");
+          missing.forEach(function (row) {
+            var item = el("div", "shoprow");
+            item.dataset.p = person.id; item.dataset.pg = page.id;
+            item.dataset.r = row.id; item.dataset.c = cat.id;
+            var box = el("span", "box");
+            box.appendChild(el("span", "boxtick", "\u2713"));
+            item.appendChild(box);
+            item.appendChild(el("span", "rowlabel", row.label));
+            if (row.sub) item.appendChild(el("span", "rowsub", row.sub));
+            item.addEventListener("click", function () {
+              var isGot = item.classList.contains("got");
+              if (isGot) { setQty(person.id, page.id, row.id, cat.id, 0); item.classList.remove("got"); }
+              else { setQty(person.id, page.id, row.id, cat.id, 1); item.classList.add("got"); }
+              updateFamilySummary(summaryEl);
+              var cc = catHead.querySelector(".cnt");
+              if (cc) { var cn = countCatNeed(page, cat.id, person); cc.textContent = cn + " needed"; }
+              if (multiPage) {
+                var pc = pageGroup.querySelector(".shophead-page .cnt");
+                if (pc) { var pn2 = countPageNeed(page, person); pc.textContent = pn2 + " needed"; }
+              }
+              var ph = personGroup.querySelector(".shophead-person .cnt");
+              if (ph) {
+                var pneed = 0;
+                state.pages.forEach(function (pg) { pneed += countPageNeed(pg, person); });
+                ph.textContent = pneed + " needed";
+              }
+            });
+            catItems.appendChild(item);
+          });
+          catGroup.appendChild(catItems);
+          pageItems.appendChild(catGroup);
+        });
+
+        if (multiPage) {
+          pageGroup.appendChild(pageItems);
+          personItems.appendChild(pageGroup);
+        }
+      });
+
+      personGroup.appendChild(personItems);
+      container.appendChild(personGroup);
+    });
+
+    summaryEl.style.display = "block";
+    if (grandTotal === 0) {
+      summaryEl.innerHTML = "All set \u2014 everyone has every item covered.";
+      container.appendChild(el("div", "shopallset", "\u2713  Nothing to buy \u2014 every item is covered for everyone."));
+    } else {
+      updateFamilySummary(summaryEl);
+    }
+  }
+
+  function updateFamilySummary(summaryEl) {
+    var total = 0, pCount = 0;
+    state.people.forEach(function (person) {
+      var pn = 0;
+      state.pages.forEach(function (page) { pn += countPageNeed(page, person); });
+      if (pn > 0) { total += pn; pCount++; }
+    });
+    if (total === 0) {
+      summaryEl.innerHTML = "All set \u2014 everyone has every item covered.";
+    } else {
+      summaryEl.innerHTML = "<span class=\"ct\">" + total + "</span> item" + (total !== 1 ? "s" : "") +
+        " still needed for <span class=\"ct\">" + pCount + "</span> " + (pCount !== 1 ? "people" : "person") + ".";
+    }
+  }
+
+  // ---------- per-cell editor ----------
+  var edit = { pid: null, pgid: null, rid: null, cid: null, wrap: null };
+
+  function openCellEditor(pid, pgid, rid, cid, rowLabel, catLabel, wrap) {
+    edit.pid = pid; edit.pgid = pgid; edit.rid = rid; edit.cid = cid; edit.wrap = wrap;
+    document.getElementById("cellTitle").textContent = activePerson().name + "  \u00B7  " + rowLabel + "  \u00B7  " + catLabel;
+    renderCellBody();
+    document.getElementById("cellOverlay").classList.add("open");
+  }
+  function closeCell() { document.getElementById("cellOverlay").classList.remove("open"); }
+  function noteListEl() { return document.getElementById("cellNoteList"); }
+
+  function makeNoteRow(value) {
+    var row = el("div", "noterow");
+    var inp = el("input", "noteinput"); inp.type = "text"; inp.value = value || ""; inp.placeholder = "e.g. reg fit, hand-me-down";
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") inp.blur(); });
+    inp.addEventListener("blur", commitNotes);
+    var del = el("button", "minibtn del"); del.type = "button"; del.title = "Remove note"; del.innerHTML = ICON.trash;
+    del.addEventListener("click", function () { row.parentNode.removeChild(row); commitNotes(); });
+    row.appendChild(inp); row.appendChild(del);
+    return row;
+  }
+  function commitNotes() {
+    var list = noteListEl();
+    if (!list || edit.pid == null) return;
+    var arr = [];
+    var inputs = list.querySelectorAll(".noteinput");
+    Array.prototype.forEach.call(inputs, function (i) { var v = i.value.trim(); if (v) arr.push(v); });
+    setNotesArr(edit.pid, edit.pgid, edit.rid, edit.cid, arr);
+    if (edit.wrap) updateCellVisual(edit.wrap);
+  }
+  function renderCellBody() {
+    var body = document.getElementById("cellBody");
+    body.innerHTML = "";
+    body.appendChild(el("div", "cellsecttitle", "Quantity"));
+    var qr = el("div", "qtyrow");
+    qr.appendChild(el("label", null, "0 = don\u2019t have it"));
+    var minus = el("button", "stepbtn", "\u2212"); minus.type = "button"; minus.title = "Less";
+    var qty = el("input", "qty"); qty.type = "text"; qty.setAttribute("inputmode", "numeric");
+    qty.value = String(qtyOf(edit.pid, edit.pgid, edit.rid, edit.cid));
+    var plus = el("button", "stepbtn", "+"); plus.type = "button"; plus.title = "More";
+    function commitQty() {
+      var n = parseInt(qty.value, 10); if (isNaN(n) || n < 0) n = 0;
+      setQty(edit.pid, edit.pgid, edit.rid, edit.cid, n);
+      qty.value = String(qtyOf(edit.pid, edit.pgid, edit.rid, edit.cid));
+      if (edit.wrap) updateCellVisual(edit.wrap);
+    }
+    function step(d) {
+      var n = qtyOf(edit.pid, edit.pgid, edit.rid, edit.cid) + d; if (n < 0) n = 0;
+      setQty(edit.pid, edit.pgid, edit.rid, edit.cid, n);
+      qty.value = String(n);
+      if (edit.wrap) updateCellVisual(edit.wrap);
+    }
+    minus.addEventListener("click", function () { step(-1); });
+    plus.addEventListener("click", function () { step(1); });
+    qty.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { qty.blur(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); step(1); }
+      else if (e.key === "ArrowDown") { e.preventDefault(); step(-1); }
+    });
+    qty.addEventListener("blur", commitQty);
+    qr.appendChild(minus); qr.appendChild(qty); qr.appendChild(plus);
+    body.appendChild(qr);
+
+    body.appendChild(el("div", "cellsecttitle", "Notes"));
+    var list = el("div"); list.id = "cellNoteList";
+    body.appendChild(list);
+    var notes = notesOf(edit.pid, edit.pgid, edit.rid, edit.cid);
+    if (notes.length) notes.forEach(function (n) { list.appendChild(makeNoteRow(n)); });
+    var addNote = el("button", "addbtn"); addNote.type = "button"; addNote.innerHTML = ICON.plus + "<span>Add note</span>";
+    addNote.addEventListener("click", function () { var r = makeNoteRow(""); list.appendChild(r); r.querySelector(".noteinput").focus(); });
+    body.appendChild(addNote);
+    var actions = el("div", "cellactions");
+    var done = el("button", "primarybtn", "Done"); done.type = "button";
+    done.addEventListener("click", function () { commitNotes(); closeCell(); });
+    actions.appendChild(done);
+    body.appendChild(actions);
+  }
+
+  function setView(v) {
+    viewMode = v;
+    document.getElementById("viewInv").classList.toggle("on", v === "inventory");
+    document.getElementById("viewShop").classList.toggle("on", v === "shopping");
+    document.getElementById("viewFamily").classList.toggle("on", v === "family");
+    document.getElementById("viewHint").textContent = (v === "shopping")
+      ? "Showing only what\u2019s missing. Switch back to full inventory to make changes."
+      : (v === "family")
+      ? "Showing what\u2019s missing for everyone. Switch back to full inventory to make changes."
+      : "Tap a cell to mark have / don\u2019t have. Tap the pencil for quantity and notes.";
+    renderGrid();
+  }
+
+  function renderAll() { renderTabs(); renderPageTabs(); renderGrid(); }
+
+  // ---------- structural edits ----------
+  function addPerson() {
+    var name = window.prompt("Name for the new person:", "Person " + (state.people.length + 1));
+    if (name === null) return;
+    name = name.trim() || ("Person " + (state.people.length + 1));
+    var src = activePerson();
+    var colorIdx = state.people.length;
+    var np = { id: uid("p"), name: name, color: colorForIndex(colorIdx) };
+    state.people.push(np);
+    state.pages.forEach(function (pg) {
+      var srcRows = pageRows(pg, src.id);
+      pg.rows[np.id] = srcRows.map(function (r) { return { id: uid("r"), label: r.label, sub: r.sub }; });
+    });
+    state.activePersonId = np.id;
+    save(); renderAll();
+    if (document.getElementById("settingsOverlay").classList.contains("open")) renderSettings();
+    toast("Added " + name);
+  }
+
+  function addPage() {
+    var label = window.prompt("Name for the new page (e.g. Coats, Pants, Hats):", "");
+    if (label === null) return;
+    label = label.trim(); if (!label) return;
+    var pg = { id: uid("pg"), label: label, rowHeader: "Size", categories: [], rows: {} };
+    state.people.forEach(function (p) { pg.rows[p.id] = []; });
+    state.pages.push(pg);
+    state.activePageId = pg.id;
+    save(); renderAll();
+    if (document.getElementById("settingsOverlay").classList.contains("open")) renderSettings();
+    toast("Added page: " + label);
+  }
+
+  function addCategory() {
+    var name = window.prompt("Name for the new column (e.g. Winter coat, Rain jacket):", "");
+    if (name === null) return;
+    name = name.trim(); if (!name) return;
+    activePage().categories.push({ id: uid("c"), label: name });
+    save(); renderGrid(); renderSettings();
+    toast("Added column: " + name);
+  }
+
+  function addRow() {
+    var label = window.prompt("Row label (e.g. Size 5, or 3T, or Age 9):", "");
+    if (label === null) return;
+    label = label.trim(); if (!label) return;
+    var sub = window.prompt("Small print under it (optional, e.g. 5\u20135.5 yrs):", "");
+    if (sub === null) sub = "";
+    var page = activePage();
+    var pid = activePerson().id;
+    if (!page.rows[pid]) page.rows[pid] = [];
+    page.rows[pid].push({ id: uid("r"), label: label, sub: sub.trim() });
+    save(); renderGrid(); renderSettings();
+    toast("Added row: " + label);
+  }
+
+  function moveItem(arr, idx, dir) {
+    var j = idx + dir;
+    if (j < 0 || j >= arr.length) return;
+    var t = arr[idx]; arr[idx] = arr[j]; arr[j] = t;
+  }
+
+  // ---------- settings ----------
+  function settingsPage() {
+    if (!settingsPageId) settingsPageId = state.activePageId;
+    var pg = state.pages.filter(function (p) { return p.id === settingsPageId; })[0];
+    return pg || state.pages[0];
+  }
+
+  function copyColumnsFrom(srcPage, destPage) {
+    var existing = {};
+    destPage.categories.forEach(function (c) { existing[c.label.toLowerCase()] = true; });
+    var added = 0;
+    srcPage.categories.forEach(function (c) {
+      if (!existing[c.label.toLowerCase()]) {
+        destPage.categories.push({ id: uid("c"), label: c.label });
+        added++;
+      }
+    });
+    save(); renderGrid(); renderSettings();
+    toast(added ? "Copied " + added + " column" + (added !== 1 ? "s" : "") + " from " + srcPage.label
+      : "No new columns to copy \u2014 all already exist.");
+  }
+
+  function copyRowsFrom(srcPage, destPage) {
+    var added = 0;
+    state.people.forEach(function (p) {
+      var srcRows = pageRows(srcPage, p.id);
+      if (!destPage.rows[p.id]) destPage.rows[p.id] = [];
+      var existing = {};
+      destPage.rows[p.id].forEach(function (r) { existing[r.label.toLowerCase()] = true; });
+      srcRows.forEach(function (r) {
+        if (!existing[r.label.toLowerCase()]) {
+          destPage.rows[p.id].push({ id: uid("r"), label: r.label, sub: r.sub });
+          added++;
+        }
+      });
+    });
+    save(); renderGrid(); renderSettings();
+    toast(added ? "Copied " + added + " row" + (added !== 1 ? "s" : "") + " from " + srcPage.label
+      : "No new rows to copy \u2014 all already exist.");
+  }
+
+  function renderSettings() {
+    var body = document.getElementById("settingsBody");
+    body.innerHTML = "";
+    var person = activePerson();
+    var page = settingsPage();
+    var rows = pageRows(page, person.id);
+
+    // Pages
+    var pgs = el("div", "sect");
+    pgs.appendChild(el("span", "cap", "Pages (clothing categories)"));
+    pgs.appendChild(el("div", "sectsub", "Each page has its own columns and rows. Shopping list compiles them all."));
+    state.pages.forEach(function (pg, i) {
+      var r = el("div", "editrow");
+      var inp = el("input"); inp.type = "text"; inp.value = pg.label;
+      inp.addEventListener("keydown", function (e) { if (e.key === "Enter") inp.blur(); });
+      inp.addEventListener("blur", function () {
+        var v = inp.value.trim(); if (v && v !== pg.label) { pg.label = v; save(); renderPageTabs(); }
+        else { inp.value = pg.label; }
+      });
+      r.appendChild(inp);
+      r.appendChild(mini(ICON.up, "Move up", i === 0, function () { moveItem(state.pages, i, -1); save(); renderPageTabs(); renderSettings(); }));
+      r.appendChild(mini(ICON.down, "Move down", i === state.pages.length - 1, function () { moveItem(state.pages, i, 1); save(); renderPageTabs(); renderSettings(); }));
+      r.appendChild(mini(ICON.trash, "Remove page", state.pages.length <= 1, function () { removePage(pg); }, true));
+      pgs.appendChild(r);
+    });
+    var addPg = el("button", "addbtn"); addPg.type = "button"; addPg.innerHTML = ICON.plus + "<span>Add page</span>";
+    addPg.addEventListener("click", addPage); pgs.appendChild(addPg);
+    body.appendChild(pgs);
+
+    // Page tab bar for settings
+    var ptbar = el("div", "setpagetabs");
+    state.pages.forEach(function (pg) {
+      var tb = el("button", "setpagetab" + (pg.id === page.id ? " active" : ""), pg.label);
+      tb.type = "button";
+      tb.addEventListener("click", function () { settingsPageId = pg.id; renderSettings(); });
+      ptbar.appendChild(tb);
+    });
+    body.appendChild(ptbar);
+
+    // Columns for this page
+    var cs = el("div", "sect");
+    cs.appendChild(el("span", "cap", "Columns for " + page.label + " (apply to everyone)"));
+    cs.appendChild(el("div", "sectsub", "Rename by typing; use the arrows to reorder; the trash removes the column."));
+    page.categories.forEach(function (cat, i) {
+      var r = el("div", "editrow");
+      var inp = el("input"); inp.type = "text"; inp.value = cat.label;
+      inp.addEventListener("keydown", function (e) { if (e.key === "Enter") inp.blur(); });
+      inp.addEventListener("blur", function () {
+        var v = inp.value.trim(); if (v && v !== cat.label) { cat.label = v; save(); renderGrid(); }
+        else { inp.value = cat.label; }
+      });
+      r.appendChild(inp);
+      r.appendChild(mini(ICON.up, "Move up", i === 0, function () { moveItem(page.categories, i, -1); save(); renderGrid(); renderSettings(); }));
+      r.appendChild(mini(ICON.down, "Move down", i === page.categories.length - 1, function () { moveItem(page.categories, i, 1); save(); renderGrid(); renderSettings(); }));
+      r.appendChild(mini(ICON.trash, "Remove column", false, function () { removeCategory(cat); }, true));
+      cs.appendChild(r);
+    });
+    var addC = el("button", "addbtn"); addC.type = "button"; addC.innerHTML = ICON.plus + "<span>Add column</span>";
+    addC.addEventListener("click", function () {
+      var prev = state.activePageId;
+      state.activePageId = page.id;
+      addCategory();
+      state.activePageId = prev;
+    });
+    cs.appendChild(addC);
+    var otherPagesForCols = state.pages.filter(function (pg) { return pg.id !== page.id && pg.categories.length > 0; });
+    if (otherPagesForCols.length) {
+      var copyDiv = el("div"); copyDiv.style.marginTop = "8px";
+      otherPagesForCols.forEach(function (src) {
+        var cb = el("button", "copybtn", "Copy columns from " + src.label);
+        cb.type = "button";
+        cb.addEventListener("click", function () { copyColumnsFrom(src, page); });
+        copyDiv.appendChild(cb);
+      });
+      cs.appendChild(copyDiv);
+    }
+    body.appendChild(cs);
+
+    // Rows for this person on this page
+    var rs = el("div", "sect");
+    rs.appendChild(el("span", "cap", "Rows for " + person.name + " on " + page.label));
+    rs.appendChild(el("div", "sectsub", "These rows are specific to this person on this page. Use \u201CCopy rows from\u201D to pull in rows from another page."));
+    var rh = el("div", "rowhead");
+    var rhl = el("label", null, "Row-header word:");
+    var rhi = el("input"); rhi.type = "text"; rhi.value = page.rowHeader;
+    rhi.addEventListener("keydown", function (e) { if (e.key === "Enter") rhi.blur(); });
+    rhi.addEventListener("blur", function () { var v = rhi.value.trim(); if (v && v !== page.rowHeader) { page.rowHeader = v; save(); renderGrid(); } else { rhi.value = page.rowHeader; } });
+    rh.appendChild(rhl); rh.appendChild(rhi); rs.appendChild(rh);
+
+    rows.forEach(function (row, i) {
+      var r = el("div", "editrow");
+      var lab = el("input"); lab.type = "text"; lab.value = row.label;
+      lab.addEventListener("keydown", function (e) { if (e.key === "Enter") lab.blur(); });
+      lab.addEventListener("blur", function () { var v = lab.value.trim(); if (v && v !== row.label) { row.label = v; save(); renderGrid(); } else { lab.value = row.label; } });
+      var sub = el("input", "sub"); sub.type = "text"; sub.value = row.sub || ""; sub.placeholder = "small print";
+      sub.addEventListener("keydown", function (e) { if (e.key === "Enter") sub.blur(); });
+      sub.addEventListener("blur", function () { var v = sub.value.trim(); if (v !== (row.sub || "")) { row.sub = v; save(); renderGrid(); } });
+      r.appendChild(lab); r.appendChild(sub);
+      r.appendChild(mini(ICON.up, "Move up", i === 0, function () { moveItem(rows, i, -1); save(); renderGrid(); renderSettings(); }));
+      r.appendChild(mini(ICON.down, "Move down", i === rows.length - 1, function () { moveItem(rows, i, 1); save(); renderGrid(); renderSettings(); }));
+      r.appendChild(mini(ICON.trash, "Remove row", false, function () { removeRow(person, row); }, true));
+      rs.appendChild(r);
+    });
+    var addR = el("button", "addbtn"); addR.type = "button"; addR.innerHTML = ICON.plus + "<span>Add row</span>";
+    addR.addEventListener("click", function () {
+      var prev = state.activePageId;
+      state.activePageId = page.id;
+      addRow();
+      state.activePageId = prev;
+    });
+    rs.appendChild(addR);
+    var otherPagesForRows = state.pages.filter(function (pg) {
+      return pg.id !== page.id && pageRows(pg, person.id).length > 0;
+    });
+    if (otherPagesForRows.length) {
+      var copyRDiv = el("div"); copyRDiv.style.marginTop = "8px";
+      otherPagesForRows.forEach(function (src) {
+        var cb = el("button", "copybtn", "Copy rows from " + src.label);
+        cb.type = "button";
+        cb.addEventListener("click", function () { copyRowsFrom(src, page); });
+        copyRDiv.appendChild(cb);
+      });
+      rs.appendChild(copyRDiv);
+    }
+    body.appendChild(rs);
+
+    // This person
+    var ps = el("div", "sect");
+    ps.appendChild(el("span", "cap", "This person"));
+    var pr = el("div", "rowhead");
+    var pl = el("label", null, "Name:");
+    var pn = el("input"); pn.type = "text"; pn.value = person.name; pn.style.width = "180px";
+    pn.addEventListener("keydown", function (e) { if (e.key === "Enter") pn.blur(); });
+    pn.addEventListener("blur", function () { var v = pn.value.trim(); if (v && v !== person.name) { person.name = v; save(); renderTabs(); document.getElementById("personName").textContent = v; } else { pn.value = person.name; } });
+    pr.appendChild(pl); pr.appendChild(pn); ps.appendChild(pr);
+
+    var colorCap = el("div", "cap", "Color");
+    colorCap.style.marginTop = "12px";
+    ps.appendChild(colorCap);
+    ps.appendChild(el("div", "sectsub", "Auto-assigned when added \u2014 tap a swatch to change it for " + person.name + "."));
+    var swrow = el("div", "swatchrow");
+    PALETTE.forEach(function (c) {
+      var sw = document.createElement("button");
+      sw.type = "button";
+      var isSel = person.color && person.color.primary === c.primary;
+      sw.className = "swatch" + (isSel ? " sel" : "");
+      sw.style.background = c.primary;
+      sw.title = c.name;
+      sw.setAttribute("aria-label", c.name);
+      sw.addEventListener("click", function () {
+        setPersonColor(person.id, c);
+        renderTabs(); renderSettings();
+        toast(person.name + "\u2019s color set to " + c.name);
+      });
+      swrow.appendChild(sw);
+    });
+    ps.appendChild(swrow);
+
+    var del = el("button", "dangerbtn", "Delete " + person.name);
+    del.type = "button";
+    del.style.marginTop = "14px";
+    if (state.people.length <= 1) { del.disabled = true; del.title = "Can\u2019t delete the only person"; }
+    del.addEventListener("click", function () { removePerson(person); });
+    ps.appendChild(del);
+    body.appendChild(ps);
+
+    // About
+    var ab = el("div", "sect");
+    ab.appendChild(el("span", "cap", "About"));
+    ab.appendChild(el("div", "aboutmeta", "Our Closet \u2014 version " + VERSION));
+    ab.appendChild(el("div", "aboutmeta", "Saves on this device only. No accounts, no internet, no names stored unless you type them."));
+    var cl = el("div", "changelog");
+    CHANGELOG.forEach(function (e) {
+      cl.appendChild(el("div", "cv", "v" + e.v + "  \u00B7  " + e.d));
+      var ul = el("ul");
+      e.notes.forEach(function (n) { ul.appendChild(el("li", null, n)); });
+      cl.appendChild(ul);
+    });
+    ab.appendChild(cl);
+    ab.appendChild(el("div", "secline", "Tip: Export a backup now and then, and before trying a new version."));
+    body.appendChild(ab);
+  }
+
+  function mini(svg, title, disabled, fn, isDel) {
+    var b = document.createElement("button");
+    b.className = "minibtn" + (isDel ? " del" : "");
+    b.type = "button"; b.title = title; b.innerHTML = svg;
+    if (disabled) b.disabled = true; else b.addEventListener("click", fn);
+    return b;
+  }
+
+  function pruneOwned() {
+    var valid = {};
+    state.pages.forEach(function (pg) {
+      state.people.forEach(function (p) {
+        var rows = pageRows(pg, p.id);
+        rows.forEach(function (r) {
+          pg.categories.forEach(function (c) { valid[key(p.id, pg.id, r.id, c.id)] = true; });
+        });
+      });
+    });
+    Object.keys(state.owned).forEach(function (k) { if (!valid[k]) delete state.owned[k]; });
+  }
+
+  function removeCategory(cat) {
+    var page = settingsPageId ? settingsPage() : activePage();
+    if (!window.confirm("Remove the column \u201C" + cat.label + "\u201D for everyone? Its checkmarks will be deleted.")) return;
+    page.categories = page.categories.filter(function (c) { return c.id !== cat.id; });
+    pruneOwned(); save(); renderGrid(); renderSettings();
+    toast("Removed column: " + cat.label);
+  }
+  function removeRow(person, row) {
+    var page = settingsPageId ? settingsPage() : activePage();
+    var rows = pageRows(page, person.id);
+    if (!window.confirm("Remove the row \u201C" + row.label + "\u201D from " + person.name + "? Its checkmarks will be deleted.")) return;
+    page.rows[person.id] = rows.filter(function (r) { return r.id !== row.id; });
+    pruneOwned(); save(); renderGrid(); renderSettings();
+    toast("Removed row: " + row.label);
+  }
+  function removePerson(person) {
+    if (state.people.length <= 1) return;
+    if (!window.confirm("Delete " + person.name + " and all their checkmarks? This can\u2019t be undone.")) return;
+    state.people = state.people.filter(function (p) { return p.id !== person.id; });
+    state.pages.forEach(function (pg) { delete pg.rows[person.id]; });
+    if (state.activePersonId === person.id) state.activePersonId = state.people[0].id;
+    pruneOwned(); save(); renderAll(); renderSettings();
+    toast("Deleted " + person.name);
+  }
+  function removePage(pg) {
+    if (state.pages.length <= 1) return;
+    if (!window.confirm("Delete the page \u201C" + pg.label + "\u201D and all its columns, rows, and checkmarks? This can\u2019t be undone.")) return;
+    state.pages = state.pages.filter(function (p) { return p.id !== pg.id; });
+    if (state.activePageId === pg.id) state.activePageId = state.pages[0].id;
+    pruneOwned(); save(); renderAll(); renderSettings();
+    toast("Deleted page: " + pg.label);
+  }
+
+  // ---------- toast ----------
+  var toastTimer = null;
+  function toast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 1900);
+  }
+
+  // ---------- modal open/close ----------
+  function openSettings() { settingsPageId = state.activePageId; renderSettings(); document.getElementById("settingsOverlay").classList.add("open"); }
+  function closeSettings() { document.getElementById("settingsOverlay").classList.remove("open"); }
+
+  // ---------- wiring ----------
+  function wire() {
+    document.getElementById("viewInv").addEventListener("click", function () { setView("inventory"); });
+    document.getElementById("viewShop").addEventListener("click", function () { setView("shopping"); });
+    document.getElementById("viewFamily").addEventListener("click", function () { setView("family"); });
+    document.getElementById("gearBtn").addEventListener("click", openSettings);
+    document.getElementById("settingsClose").addEventListener("click", closeSettings);
+    document.getElementById("settingsOverlay").addEventListener("click", function (e) { if (e.target === this) closeSettings(); });
+    document.getElementById("cellClose").addEventListener("click", function () { commitNotes(); closeCell(); });
+    document.getElementById("cellOverlay").addEventListener("click", function (e) { if (e.target === this) { commitNotes(); closeCell(); } });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { commitNotes(); closeCell(); closeSettings(); } });
+    document.getElementById("exportBtn").addEventListener("click", doExport);
+    document.getElementById("importBtn").addEventListener("click", function () { document.getElementById("importFile").click(); });
+    document.getElementById("importFile").addEventListener("change", function (e) {
+      var f = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        var obj = null;
+        try { obj = JSON.parse(reader.result); } catch (err) { toast("That file isn\u2019t valid JSON."); return; }
+        importFromObject(obj);
+      };
+      reader.onerror = function () { toast("Couldn\u2019t read that file."); };
+      reader.readAsText(f);
+    });
+  }
+
+  window.__inv = {
+    getState: function () { return state; },
+    has: has, qtyOf: qtyOf, notesOf: notesOf, setQty: setQty, setNotesArr: setNotesArr,
+    buildBackupJSON: buildBackupJSON, validateBackup: validateBackup,
+    migrate: migrate, normCell: normCell, defaultState: defaultState,
+    addPerson: addPerson, addPage: addPage, addCategory: addCategory, addRow: addRow,
+    removeCategory: removeCategory, removeRow: removeRow, removePerson: removePerson, removePage: removePage,
+    importFromObject: importFromObject, setView: setView, renderFamilyList: renderFamilyList,
+    copyColumnsFrom: copyColumnsFrom, copyRowsFrom: copyRowsFrom,
+    renderAll: renderAll, activePage: activePage, pageRows: pageRows,
+    STORAGE_KEY: STORAGE_KEY, VERSION: VERSION,
+    PALETTE: PALETTE, colorForIndex: colorForIndex, setPersonColor: setPersonColor, applyPersonTheme: applyPersonTheme
+  };
+
+  load();
+  wire();
+  renderAll();
+})();
+</script>
+
+<!-- ===== SELF-TEST PANEL — safe to delete; runs only when URL ends in ?test ===== -->
+<div id="selftest" style="display:none;position:fixed;top:0;right:0;max-width:380px;
+  max-height:100vh;overflow:auto;background:#111;color:#eee;font:12px/1.4 monospace;
+  padding:10px;z-index:99999;border-left:2px solid #555"></div>
+<script>
+(function () {
+  if (location.search.indexOf('test') === -1) return;
+  var panel = document.getElementById('selftest');
+  panel.style.display = 'block';
+  var pass = 0, fail = 0, log = [];
+  function check(name, cond) { if (cond) { pass++; log.push('PASS  ' + name); } else { fail++; log.push('FAIL  ' + name); } }
+  function render() {
+    panel.innerHTML = '<b>' + (fail === 0 ? 'ALL PASS' : fail + ' FAILED') + '</b> (' + pass + '/' + (pass + fail) + ')<br>' +
+      log.map(function (l) { var red = l.indexOf('FAIL') === 0; return '<span style="color:' + (red ? '#f66' : '#6f6') + '">' + l + '</span>'; }).join('<br>');
+  }
+  window.confirm = function () { return true; };
+
+  setTimeout(function () {
+    var api = window.__inv;
+    var savedRaw = null;
+    try { savedRaw = localStorage.getItem(api.STORAGE_KEY); } catch (e) {}
+
+    try {
+      var S = api.getState();
+
+      // --- data model is v4 with pages ---
+      check('State has pages array', Array.isArray(S.pages) && S.pages.length > 0);
+      check('First page is Footwear', S.pages[0].label === 'Footwear');
+      check('People no longer have rows', S.people[0].rows === undefined);
+      check('Page has rows keyed by person', Array.isArray(S.pages[0].rows['p1']));
+      check('Page has categories', Array.isArray(S.pages[0].categories) && S.pages[0].categories.length === 5);
+
+      // --- person colors ---
+      check('People have colors assigned', S.people.every(function (p) { return p.color && typeof p.color.primary === 'string'; }));
+      check('First two people have different colors', S.people[0].color.primary !== S.people[1].color.primary);
+      check('First person color matches palette rotation', S.people[0].color.primary === api.colorForIndex(0).primary);
+      check('Second person color matches palette rotation', S.people[1].color.primary === api.colorForIndex(1).primary);
+      check('--person CSS var matches active person on load',
+        getComputedStyle(document.documentElement).getPropertyValue('--person').trim().toLowerCase() === S.people[0].color.primary.toLowerCase());
+
+      // --- page tabs render ---
+      var pageTabs = document.querySelectorAll('#pageTabs .pagetab:not(.addpg)');
+      check('Page tabs render', pageTabs.length === S.pages.length);
+
+      // --- person tabs ---
+      var tabBtns = document.querySelectorAll('#tabs .tab:not(.add)');
+      check('Two person tabs render', tabBtns.length === 2);
+
+      // --- pre-fill data (now uses 4-part keys) ---
+      check('Person 1 size 8 sneakers = have', api.has('p1', 'footwear', 's8', 'sneakers'));
+      check('Person 2 size 13 crocs = have', api.has('p2', 'footwear', 'b13', 'crocs'));
+      check('Old note migrated ("reg")', api.notesOf('p1', 'footwear', 's9', 'sneakers')[0] === 'reg');
+
+      // --- switch person, confirm grid + color shift ---
+      tabBtns[1].click();
+      var p2wrap = document.querySelector('.cellwrap[data-r="b12"][data-c="sneakers"] button.tog');
+      check('Switching person tab shows their grid', !!p2wrap && p2wrap.classList.contains('have'));
+      check('Switching person updates --person CSS var',
+        getComputedStyle(document.documentElement).getPropertyValue('--person').trim().toLowerCase() === S.people[1].color.primary.toLowerCase());
+      check('whoLabel updates to switched person', document.getElementById('whoLabel').textContent === S.people[1].name);
+      tabBtns[0].click();
+      check('Switching back restores --person CSS var',
+        getComputedStyle(document.documentElement).getPropertyValue('--person').trim().toLowerCase() === S.people[0].color.primary.toLowerCase());
+
+      // --- quick tap toggle ---
+      var togBtn = document.querySelector('.cellwrap[data-r="s11"][data-c="rainboots"] button.tog');
+      var before = api.has('p1', 'footwear', 's11', 'rainboots');
+      togBtn.click();
+      check('Quick tap flips cell', api.has('p1', 'footwear', 's11', 'rainboots') === !before);
+      togBtn.click();
+      check('Quick tap flips back', api.has('p1', 'footwear', 's11', 'rainboots') === before);
+
+      // --- quantity display ---
+      api.setQty('p1', 'footwear', 's8', 'sneakers', 3); api.renderAll();
+      check('Cell shows number when qty > 1', document.querySelector('.cellwrap[data-r="s8"][data-c="sneakers"] .mk').textContent === '3');
+      api.setQty('p1', 'footwear', 's8', 'sneakers', 1); api.renderAll();
+      check('Cell shows check when qty = 1', document.querySelector('.cellwrap[data-r="s8"][data-c="sneakers"] .mk').textContent === '\u2713');
+
+      // --- pencil editor ---
+      document.querySelector('.cellwrap[data-r="s8"][data-c="sandals"] button.pencil').click();
+      check('Pencil opens editor', document.getElementById('cellOverlay').classList.contains('open'));
+      check('Editor titled correctly', /Sandals/.test(document.getElementById('cellTitle').textContent));
+      check('Existing note shows', document.querySelector('#cellNoteList .noteinput').value === 'may change');
+      document.querySelector('#cellBody .addbtn').click();
+      var newInput = document.querySelectorAll('#cellNoteList .noteinput')[1];
+      newInput.value = 'hand-me-down';
+      newInput.dispatchEvent(new Event('blur'));
+      check('Multiple notes work', api.notesOf('p1','footwear','s8','sandals').length === 2);
+      var steppers = document.querySelectorAll('#cellBody .stepbtn');
+      steppers[1].click();
+      check('Editor + increases qty', api.qtyOf('p1','footwear','s8','sandals') === 2);
+      steppers[0].click();
+      var noteRows = document.querySelectorAll('#cellNoteList .noterow');
+      noteRows[noteRows.length - 1].querySelector('.minibtn.del').click();
+      check('Editor can remove note', api.notesOf('p1','footwear','s8','sandals').length === 1);
+      document.querySelector('#cellBody .primarybtn').click();
+      check('Done closes editor', !document.getElementById('cellOverlay').classList.contains('open'));
+
+      // --- add / remove column ---
+      var page = api.activePage();
+      var catCountBefore = page.categories.length;
+      window.prompt = function () { return 'Coat'; };
+      api.addCategory();
+      check('Add column adds one', page.categories.length === catCountBefore + 1);
+      var coat = page.categories[page.categories.length - 1];
+      check('New column in grid', Array.prototype.some.call(document.querySelectorAll('#grid thead th'), function (th) { return th.textContent.indexOf('Coat') === 0; }));
+      document.querySelector('.cellwrap[data-r="s8"][data-c="' + coat.id + '"] button.tog').click();
+      check('Can check new column', api.has('p1', 'footwear', 's8', coat.id));
+      api.removeCategory(coat);
+      check('Remove column works', page.categories.length === catCountBefore);
+
+      // --- add / remove row ---
+      var rows = api.pageRows(page, 'p1');
+      var rowsBefore = rows.length;
+      var promptCalls = 0;
+      window.prompt = function () { promptCalls++; return promptCalls === 1 ? 'Size 5' : '9 yrs'; };
+      api.addRow();
+      check('Add row adds one', api.pageRows(page, 'p1').length === rowsBefore + 1);
+      var newRow = api.pageRows(page, 'p1')[api.pageRows(page, 'p1').length - 1];
+      api.removeRow({ id: 'p1', name: 'Person 1' }, newRow);
+      check('Remove row works', api.pageRows(page, 'p1').length === rowsBefore);
+
+      // --- add / remove person (checks color auto-assignment too) ---
+      var peopleBefore = S.people.length;
+      window.prompt = function () { return 'Person X'; };
+      api.addPerson();
+      check('Add person adds tab', document.querySelectorAll('#tabs .tab:not(.add)').length === peopleBefore + 1);
+      var added = S.people[S.people.length - 1];
+      check('New person has rows on page', api.pageRows(page, added.id).length > 0);
+      check('New person auto-assigned a color', added.color && typeof added.color.primary === 'string');
+      check('New person color follows palette rotation', added.color.primary === api.colorForIndex(peopleBefore).primary);
+      api.removePerson(added);
+      check('Delete person works', S.people.length === peopleBefore);
+
+      // --- setPersonColor API ---
+      var testPerson = S.people[0];
+      var originalColor = { name: testPerson.color.name, primary: testPerson.color.primary, deep: testPerson.color.deep, soft: testPerson.color.soft };
+      var altColor = api.PALETTE[0].primary === originalColor.primary ? api.PALETTE[1] : api.PALETTE[0];
+      api.setPersonColor(testPerson.id, altColor);
+      check('setPersonColor updates person color', testPerson.color.primary === altColor.primary);
+      check('setPersonColor updates CSS var when active',
+        getComputedStyle(document.documentElement).getPropertyValue('--person').trim().toLowerCase() === altColor.primary.toLowerCase());
+      api.setPersonColor(testPerson.id, originalColor);
+      check('Color restored after API test', testPerson.color.primary === originalColor.primary);
+      api.applyPersonTheme();
+
+      // --- Settings swatch picker (real click-through) ---
+      document.getElementById('gearBtn').click();
+      check('Settings opens', document.getElementById('settingsOverlay').classList.contains('open'));
+      var swatches = document.querySelectorAll('.swatchrow .swatch');
+      check('Color swatches render in Settings', swatches.length === api.PALETTE.length);
+      var selSwatch = document.querySelector('.swatchrow .swatch.sel');
+      check('One swatch marked selected', !!selSwatch);
+      check('Selected swatch matches current color name', !!selSwatch && selSwatch.title === testPerson.color.name);
+      var beforeSwatchColor = testPerson.color.primary;
+      var otherSwatch = Array.prototype.filter.call(swatches, function (s) { return !s.classList.contains('sel'); })[0];
+      otherSwatch.click();
+      check('Clicking a swatch changes the person color', testPerson.color.primary !== beforeSwatchColor);
+      check('Clicking a swatch updates --person CSS var',
+        getComputedStyle(document.documentElement).getPropertyValue('--person').trim().toLowerCase() === testPerson.color.primary.toLowerCase());
+      // restore to original so the rest of the tests (and the user's real data) are undisturbed
+      api.setPersonColor(testPerson.id, originalColor);
+      document.getElementById('settingsClose').click();
+      check('Settings closes', !document.getElementById('settingsOverlay').classList.contains('open'));
+
+      // --- add / remove page ---
+      var pagesBefore = S.pages.length;
+      window.prompt = function () { return 'Coats'; };
+      api.addPage();
+      check('Add page adds one', S.pages.length === pagesBefore + 1);
+      var newPg = S.pages[S.pages.length - 1];
+      check('New page has correct label', newPg.label === 'Coats');
+      check('New page has empty rows for each person', Array.isArray(newPg.rows['p1']));
+      check('Page tabs updated', document.querySelectorAll('#pageTabs .pagetab:not(.addpg)').length === S.pages.length);
+      api.removePage(newPg);
+      check('Remove page works', S.pages.length === pagesBefore);
+
+      // --- backup ---
+      check('Good backup passes validation', api.validateBackup(JSON.parse(api.buildBackupJSON())) === null);
+      check('Junk backup rejected', typeof api.validateBackup({ nope: 1 }) === 'string');
+      check('Backup has version + owned', /"version"/.test(api.buildBackupJSON()) && /"owned"/.test(api.buildBackupJSON()));
+
+      // --- cell conversion ---
+      var nc = api.normCell({ have: true, note: 'reg fit' });
+      check('Old {have,note} converts', nc.qty === 1 && nc.notes[0] === 'reg fit');
+
+      // --- migration from v0.3 (3-part keys) ---
+      var v3 = { version: 3, rowHeader: 'Size',
+        categories: [{ id: 'sneakers', label: 'Sneakers' }],
+        people: [{ id: 'p1', name: 'P1', rows: [{ id: 's1', label: 'Size 1', sub: '' }] }],
+        owned: { 'p1|s1|sneakers': { qty: 1, notes: ['test'] } },
+        activePersonId: 'p1' };
+      var m3 = api.migrate(v3);
+      check('v3 migrates to v4 with pages', m3.version === 4 && Array.isArray(m3.pages));
+      check('v3 owned rekeyed to 4-part', m3.owned['p1|footwear|s1|sneakers'] && m3.owned['p1|footwear|s1|sneakers'].qty === 1);
+      check('v3 rows moved to page', api.pageRows(m3.pages[0], 'p1').length === 1);
+      check('v3 migration assigns colors', m3.people.every(function (p) { return p.color && typeof p.color.primary === 'string'; }));
+
+      // --- migration from v0.1 ---
+      var v1 = { version: 1, owned: { 'p1|s3|sneakers': { have: true, note: 'v1 edit' } } };
+      var m1 = api.migrate(v1);
+      check('v1 mark migrated (4-part key, qty)', m1.owned['p1|footwear|s3|sneakers'] && m1.owned['p1|footwear|s3|sneakers'].qty === 1);
+      check('v1 note carried', m1.owned['p1|footwear|s3|sneakers'].notes[0] === 'v1 edit');
+      check('v1 migration assigns colors', m1.people.every(function (p) { return p.color && typeof p.color.primary === 'string'; }));
+
+      // --- grid + / - buttons ---
+      var addColBtn = document.querySelector('thead .gridplus');
+      check('Add-column button on grid', !!addColBtn);
+      var addRowBtn = document.querySelector('.addrowtr .gridplus');
+      check('Add-row button on grid', !!addRowBtn);
+      var delColBtns = document.querySelectorAll('thead .delcol');
+      check('Remove-column buttons on headers', delColBtns.length === page.categories.length);
+      var delRowBtns = document.querySelectorAll('tbody .delrow');
+      check('Remove-row buttons on rows', delRowBtns.length === api.pageRows(page, 'p1').length);
+
+      // --- copy columns/rows between pages ---
+      window.prompt = function () { return 'Coats'; };
+      api.addPage();
+      var coatsPage = S.pages[S.pages.length - 1];
+      check('Coats page starts with 0 columns', coatsPage.categories.length === 0);
+      api.copyColumnsFrom(page, coatsPage);
+      check('Copy columns populates Coats', coatsPage.categories.length === page.categories.length);
+      check('Copied columns have new IDs', coatsPage.categories[0].id !== page.categories[0].id);
+      // Copy again should not duplicate
+      var countBefore = coatsPage.categories.length;
+      api.copyColumnsFrom(page, coatsPage);
+      check('Copy columns skips duplicates', coatsPage.categories.length === countBefore);
+      // Copy rows
+      check('Coats page starts with 0 rows for p1', api.pageRows(coatsPage, 'p1').length === 0);
+      api.copyRowsFrom(page, coatsPage);
+      check('Copy rows populates Coats', api.pageRows(coatsPage, 'p1').length === api.pageRows(page, 'p1').length);
+      // Clean up test page
+      api.removePage(coatsPage);
+
+      // --- shopping list (grocery, compiled) ---
+      api.setView('shopping');
+      check('Shopping view activates', document.getElementById('viewShop').classList.contains('on'));
+      var shopSummary = document.getElementById('shopSummary');
+      check('Shopping summary visible', shopSummary.style.display === 'block');
+      check('Summary has count', /\d/.test(shopSummary.textContent));
+      var groups = document.querySelectorAll('#shopList .shopgroup');
+      check('Shopping list has groups', groups.length > 0);
+      var shopItems = document.querySelectorAll('#shopList .shoprow');
+      check('Shopping list has items', shopItems.length > 0);
+
+      // Collapse
+      groups[0].querySelector('.shophead').click();
+      check('Collapse works', groups[0].classList.contains('collapsed'));
+      groups[0].querySelector('.shophead').click();
+      check('Expand works', !groups[0].classList.contains('collapsed'));
+
+      // Check off an item
+      var firstItem = shopItems[0];
+      firstItem.click();
+      check('Tap marks got (qty 1)', firstItem.classList.contains('got'));
+      firstItem.click();
+      check('Tap again undoes', !firstItem.classList.contains('got'));
+
+      // --- family list ---
+      api.setView('family');
+      check('Family view activates', document.getElementById('viewFamily').classList.contains('on'));
+      var famSummary = document.getElementById('shopSummary');
+      check('Family summary visible', famSummary.style.display === 'block');
+      check('Family summary mentions people', /people|person/.test(famSummary.textContent));
+      var famGroups = document.querySelectorAll('#shopList .shopgroup-person');
+      check('Family list has person groups', famGroups.length > 0);
+      var famItems = document.querySelectorAll('#shopList .shoprow');
+      check('Family list has items', famItems.length > 0);
+      // Collapse a person group
+      famGroups[0].querySelector('.shophead').click();
+      check('Person group collapses', famGroups[0].classList.contains('collapsed'));
+      famGroups[0].querySelector('.shophead').click();
+      check('Person group expands', !famGroups[0].classList.contains('collapsed'));
+      // Check off an item
+      var famFirstItem = document.querySelectorAll('#shopList .shoprow')[0];
+      famFirstItem.click();
+      check('Family list tap marks got', famFirstItem.classList.contains('got'));
+      famFirstItem.click();
+      check('Family list tap undoes', !famFirstItem.classList.contains('got'));
+
+      api.setView('shopping');
+
+      // All-set
+      S.pages.forEach(function (pg) {
+        S.people.forEach(function (p) {
+          api.pageRows(pg, p.id).forEach(function (row) {
+            pg.categories.forEach(function (cat) {
+              if (!api.has(p.id, pg.id, row.id, cat.id)) api.setQty(p.id, pg.id, row.id, cat.id, 1);
+            });
+          });
+        });
+      });
+      api.setView('shopping');
+      check('All-set shows', /All set/.test(shopSummary.textContent));
+
+      api.setView('inventory');
+      var allRows = api.pageRows(api.activePage(), 'p1');
+      check('Switch back restores grid', document.querySelectorAll('#grid tbody tr:not(.addrowtr)').length === allRows.length);
+
+      // --- persistence ---
+      var saved = JSON.parse(localStorage.getItem(api.STORAGE_KEY));
+      check('Saved as v4', saved && saved.version === 4 && Array.isArray(saved.pages));
+      check('Saved data includes person colors', saved.people.every(function (p) { return p.color && typeof p.color.primary === 'string'; }));
+
+    } catch (e) {
+      check('Tests ran without crashing \u2014 ' + e.message, false);
+    }
+
+    try {
+      if (savedRaw === null) localStorage.removeItem(api.STORAGE_KEY);
+      else localStorage.setItem(api.STORAGE_KEY, savedRaw);
+    } catch (e) {}
+    render();
+  }, 250);
+})();
+</script>
+<!-- ===== END SELF-TEST PANEL ===== -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(function () {});
+}
+</script>
+</body>
+</html>
